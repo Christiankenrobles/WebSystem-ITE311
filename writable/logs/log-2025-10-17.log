@@ -1,0 +1,78 @@
+ERROR - 2025-10-17 18:00:16 --> mysqli_sql_exception: Unknown column 'enrollments.enrollment_date' in 'field list' in C:\xampp\htdocs\ITE311-ROBLES\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-ROBLES\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `courses...', 0)
+#1 C:\xampp\htdocs\ITE311-ROBLES\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `courses...')
+#2 C:\xampp\htdocs\ITE311-ROBLES\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `courses...')
+#3 C:\xampp\htdocs\ITE311-ROBLES\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `courses...', Array, false)
+#4 C:\xampp\htdocs\ITE311-ROBLES\app\Models\CourseModel.php(30): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\ITE311-ROBLES\app\Controllers\Home.php(34): App\Models\CourseModel->getUserEnrollments('2')
+#6 C:\xampp\htdocs\ITE311-ROBLES\system\CodeIgniter.php(933): App\Controllers\Home->dashboard()
+#7 C:\xampp\htdocs\ITE311-ROBLES\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+#8 C:\xampp\htdocs\ITE311-ROBLES\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\xampp\htdocs\ITE311-ROBLES\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\xampp\htdocs\ITE311-ROBLES\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\xampp\htdocs\ITE311-ROBLES\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2025-10-17 18:00:16 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'enrollments.enrollment_date' in 'field list'
+[Method: GET, Route: dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `courses`.`id`, `courses`.`title`, `courses`.`description`, `enrollments`.`enrollment_date`
+FROM `enrollments`
+JOIN `courses` ON `enrollments`.`course_id` = `courses`.`id`
+WHERE `enrollments`.`user_id` = :enrollments.user_id:', [...], false)
+ 2 APPPATH\Models\CourseModel.php(30): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Home.php(34): App\Models\CourseModel->getUserEnrollments('2')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Home->dashboard()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-17 18:00:16 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'enrollments.enrollment_date' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `courses`.`id`, `courses`.`title`, `courses`.`description`, `enrollments`.`enrollment_date`
+FROM `enrollments`
+JOIN `courses` ON `enrollments`.`course_id` = `courses`.`id`
+WHERE `enrollments`.`user_id` = \'2\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `courses`.`id`, `courses`.`title`, `courses`.`description`, `enrollments`.`enrollment_date`
+FROM `enrollments`
+JOIN `courses` ON `enrollments`.`course_id` = `courses`.`id`
+WHERE `enrollments`.`user_id` = \'2\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `courses`.`id`, `courses`.`title`, `courses`.`description`, `enrollments`.`enrollment_date`
+FROM `enrollments`
+JOIN `courses` ON `enrollments`.`course_id` = `courses`.`id`
+WHERE `enrollments`.`user_id` = :enrollments.user_id:', [...], false)
+ 4 APPPATH\Models\CourseModel.php(30): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Home.php(34): App\Models\CourseModel->getUserEnrollments('2')
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Home->dashboard()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-10-17 18:00:16 --> [Caused by] mysqli_sql_exception: Unknown column 'enrollments.enrollment_date' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `courses`.`id`, `courses`.`title`, `courses`.`description`, `enrollments`.`enrollment_date`
+FROM `enrollments`
+JOIN `courses` ON `enrollments`.`course_id` = `courses`.`id`
+WHERE `enrollments`.`user_id` = \'2\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `courses`.`id`, `courses`.`title`, `courses`.`description`, `enrollments`.`enrollment_date`
+FROM `enrollments`
+JOIN `courses` ON `enrollments`.`course_id` = `courses`.`id`
+WHERE `enrollments`.`user_id` = \'2\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `courses`.`id`, `courses`.`title`, `courses`.`description`, `enrollments`.`enrollment_date`
+FROM `enrollments`
+JOIN `courses` ON `enrollments`.`course_id` = `courses`.`id`
+WHERE `enrollments`.`user_id` = \'2\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `courses`.`id`, `courses`.`title`, `courses`.`description`, `enrollments`.`enrollment_date`
+FROM `enrollments`
+JOIN `courses` ON `enrollments`.`course_id` = `courses`.`id`
+WHERE `enrollments`.`user_id` = :enrollments.user_id:', [...], false)
+ 5 APPPATH\Models\CourseModel.php(30): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Home.php(34): App\Models\CourseModel->getUserEnrollments('2')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Home->dashboard()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

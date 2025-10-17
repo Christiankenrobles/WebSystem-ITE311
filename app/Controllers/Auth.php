@@ -29,6 +29,8 @@ class Auth extends BaseController
             $session->set([
                 'isLoggedIn' => true,
                 'userEmail' => $email,
+                'user_id' => $user['id'],
+                'role' => $user['role'],
             ]);
             return redirect()->to(base_url('dashboard'));
         }

@@ -26,6 +26,15 @@ class Home extends BaseController
             return redirect()->to(base_url('login'));
         }
 
-        return view('dashboard');
+        $data = [];
+
+        if ($session->get('role') === 'student') {
+            $courseModel = new \App\Models\CourseModel();
+            $userId = $session->get('user_id');
+            $data['enrolledCourses'] = $courseModel->getUserEnrollments($userId);
+            $data['availableCourses'] = $courseModel->getAvailableCourses($userId);
+        }
+
+        return view('dashboard', $data);
     }
 }
