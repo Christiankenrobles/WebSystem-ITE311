@@ -14,8 +14,8 @@
         <div class="card-body">
             <?php if (session('role') === 'admin'): ?>
                 <p class="mb-0">Admin Dashboard: Manage users, courses, and system settings.</p>
-            <?php elseif (session('role') === 'instructor'): ?>
-                <p class="mb-0">Instructor Dashboard: Create and manage courses and lessons.</p>
+            <?php elseif (session('role') === 'teacher'): ?>
+                <p class="mb-0">Teacher Dashboard: Create and manage courses and lessons.</p>
             <?php else: ?>
                 <p class="mb-0">Student Dashboard: Enroll in courses and take quizzes.</p>
             <?php endif; ?>
@@ -71,52 +71,56 @@
                 var courseId = $(this).data('course-id');
                 var button = $(this);
 
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.post('<?= base_url('course/enroll') ?>', { course_id: courseId }, function(response) {
-                    if (response.success) {
-                        // Show success alert
-                        var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
-                            response.message +
-                            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                            '</div>';
-                        $('.container').prepend(alertHtml);
+                $.post('<?= base_url('course/enroll') ?>', { course_id: courseId })
+                    .done(function(response) {
+                        if (response.success) {
+                            // Show success alert
+                            var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                response.message +
+                                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                                '</div>';
+                            $('.container').prepend(alertHtml);
 
-                        // Hide or disable the enroll button
-                        button.prop('disabled', true).text('Enrolled');
+                            // Hide or disable the enroll button
+                            button.prop('disabled', true).text('Enrolled');
 
-                        // Update enrolled courses list dynamically
-                        var enrolledList = $('#enrolled-courses');
-                        var courseCard = button.closest('.card');
-                        var courseTitle = courseCard.find('.card-title').text();
-                        var courseDesc = courseCard.find('.card-text').text();
-                        var currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                            // Update enrolled courses list dynamically
+                            var enrolledList = $('#enrolled-courses');
+                            var courseCard = button.closest('.card');
+                            var courseTitle = courseCard.find('.card-title').text();
+                            var courseDesc = courseCard.find('.card-text').text();
+                            var currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-                        var newEnrolledItem = '<div class="list-group-item">' +
-                            '<h5 class="mb-1">' + courseTitle + '</h5>' +
-                            '<p class="mb-1">' + courseDesc + '</p>' +
-                            '<small>Enrolled on: ' + currentDate + '</small>' +
-                            '</div>';
+                            var newEnrolledItem = '<div class="list-group-item">' +
+                                '<h5 class="mb-1">' + courseTitle + '</h5>' +
+                                '<p class="mb-1">' + courseDesc + '</p>' +
+                                '<small>Enrolled on: ' + currentDate + '</small>' +
+                                '</div>';
 
-                        if (enrolledList.find('.list-group-item').first().text() === 'No enrolled courses yet.') {
-                            enrolledList.empty();
+                            if (enrolledList.find('.list-group-item').first().text() === 'No enrolled courses yet.') {
+                                enrolledList.empty();
+                            }
+                            enrolledList.append(newEnrolledItem);
+
+                            // Remove the course from available courses
+                            courseCard.parent().remove();
+                        } else {
+                            // Show error alert
+                            var alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                                response.message +
+                                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                                '</div>';
+                            $('.container').prepend(alertHtml);
                         }
-                        enrolledList.append(newEnrolledItem);
-
-                        // Remove the course from available courses
-                        courseCard.parent().remove();
-                    } else {
-                        // Show error alert
+                    })
+                    .fail(function(xhr, status, error) {
+                        // Show error alert for request failure
                         var alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
-                            response.message +
+                            'Enrollment failed: ' + error +
                             '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
                             '</div>';
                         $('.container').prepend(alertHtml);
-                    }
-                }, 'json');
+                    });
             });
         });
     </script>
