@@ -33,6 +33,12 @@
                             <h5 class="mb-1"><?= esc($course['title']) ?></h5>
                             <p class="mb-1"><?= esc($course['description']) ?></p>
                             <small>Enrolled on: <?= esc($course['enrollment_date']) ?></small>
+                            <?php if (!empty($materials[$course['id']])): ?>
+                                <div class="mt-3">
+                                    <h6>Materials:</h6>
+                                    <a href="<?= base_url('materials/list/' . $course['id']) ?>" class="btn btn-primary btn-sm">View All Materials</a>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>

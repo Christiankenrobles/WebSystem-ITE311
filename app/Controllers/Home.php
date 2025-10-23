@@ -33,6 +33,14 @@ class Home extends BaseController
             $userId = $session->get('user_id');
             $data['enrolledCourses'] = $courseModel->getUserEnrollments($userId);
             $data['availableCourses'] = $courseModel->getAvailableCourses($userId);
+
+            // Fetch materials for enrolled courses
+            $materialModel = new \App\Models\MaterialModel();
+            $materials = [];
+            foreach ($data['enrolledCourses'] as $course) {
+                $materials[$course['id']] = $materialModel->getMaterialsByCourse($course['id']);
+            }
+            $data['materials'] = $materials;
         }
 
         return view('dashboard', $data);
