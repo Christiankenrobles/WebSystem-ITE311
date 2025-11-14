@@ -1,7 +1,3 @@
-Step 5: Create the File Upload View
-Create a view file.
-The view should contain a form with the enctype="multipart/form-data" attribute and a file input field.
-Style the form using Bootstrap classes.
 <?php
 
 namespace App\Controllers;
@@ -15,27 +11,51 @@ class Materials extends BaseController
     public function upload($course_id)
     {
         $session = session();
-        if (!$session->get('isLoggedIn') || $session->get('role') !== 'teacher') {
-            return redirect()->to(base_url('login'));
+        $userRole = $session->get('role');
+        
+        // Allow both admin and teacher to upload materials
+        if (!$session->get('isLoggedIn') || ($userRole !== 'teacher' && $userRole !== 'admin')) {
+            return redirect()->to(base_url('login'))->with('error', 'Only teachers and admins can upload materials');
         }
 
         if ($this->request->getMethod() === 'post') {
-            // Load File Uploading Library
-            $upload = \Config\Services::upload();
-            $validation = \Config\Services::validation();
+            try {
+                // Validate course exists
+                $courseModel = new \App\Models\CourseModel();
+                $course = $courseModel->find($course_id);
+                if (!$course) {
+                    return redirect()->to(base_url('dashboard'))->with('error', 'Course not found');
+                }
 
-            // Configure upload preferences
-            $upload->initialize([
-                'upload_path' => WRITEPATH . 'uploads/',
-                'allowed_types' => 'pdf|doc|docx|txt|jpg|jpeg|png|mp4|avi',
-                'max_size' => 10240, // 10MB
-                'encrypt_name' => true,
-            ]);
+                // Load File Uploading Library
+                $upload = \Config\Services::upload();
 
-            if (!$upload->do_upload('material_file')) {
-                return redirect()->to(base_url('materials/upload/' . $course_id))->with('error', $upload->display_errors());
-            } else {
+                // Configure upload preferences
+                $config = [
+                    'upload_path' => WRITEPATH . 'uploads/',
+                    'allowed_types' => 'pdf|doc|docx|txt|jpg|jpeg|png|mp4|avi',
+                    'max_size' => 10240, // 10MB
+                    'encrypt_name' => true,
+                ];
+
+                $upload->initialize($config);
+
+                if (!$upload->do_upload('material_file')) {
+                    $errors = $upload->getErrors();
+                    $errorMessage = is_array($errors) ? implode(', ', $errors) : $errors;
+                    return redirect()->to(base_url('materials/upload/' . $course_id))
+                        ->with('error', 'Upload failed: ' . $errorMessage);
+                }
+
                 $fileData = $upload->data();
+                
+                // Ensure file was actually created
+                if (!file_exists(WRITEPATH . 'uploads/' . $fileData['file_name'])) {
+                    return redirect()->to(base_url('materials/upload/' . $course_id))
+                        ->with('error', 'File upload verification failed');
+                }
+
+                // Save to database
                 $materialModel = new \App\Models\MaterialModel();
                 $data = [
                     'course_id' => $course_id,
@@ -45,10 +65,17 @@ class Materials extends BaseController
                 ];
 
                 if ($materialModel->insert($data)) {
-                    return redirect()->to(base_url('teacher/dashboard'))->with('success', 'Material uploaded successfully');
+                    return redirect()->to(base_url('dashboard'))
+                        ->with('success', 'Material "' . $fileData['client_name'] . '" uploaded successfully!');
                 } else {
-                    return redirect()->to(base_url('materials/upload/' . $course_id))->with('error', 'Failed to save material to database');
+                    // Delete file if database insert failed
+                    @unlink(WRITEPATH . 'uploads/' . $fileData['file_name']);
+                    return redirect()->to(base_url('materials/upload/' . $course_id))
+                        ->with('error', 'Failed to save material to database. File deleted.');
                 }
+            } catch (\Exception $e) {
+                return redirect()->to(base_url('materials/upload/' . $course_id))
+                    ->with('error', 'An error occurred: ' . $e->getMessage());
             }
         }
 
@@ -58,8 +85,11 @@ class Materials extends BaseController
     public function delete($material_id)
     {
         $session = session();
-        if (!$session->get('isLoggedIn') || $session->get('role') !== 'teacher') {
-            return redirect()->to(base_url('login'));
+        $userRole = $session->get('role');
+        
+        // Allow both admin and teacher to delete materials
+        if (!$session->get('isLoggedIn') || ($userRole !== 'teacher' && $userRole !== 'admin')) {
+            return redirect()->to(base_url('login'))->with('error', 'Only teachers and admins can delete materials');
         }
 
         $materialModel = new \App\Models\MaterialModel();

@@ -18,6 +18,9 @@ $routes->get('/login', 'Auth::login');
 $routes->post('/login', 'Auth::attempt');
 $routes->get('/logout', 'Auth::logout');
 $routes->get('/dashboard', 'Home::dashboard');
+$routes->get('/admin/dashboard', 'Home::dashboard');
+$routes->get('/teacher/dashboard', 'Home::dashboard');
+$routes->get('/admin/materials', 'Home::materialsManagement');
 // Registration
 $routes->get('/register', 'Auth::register');
 $routes->post('/register', 'Auth::store');

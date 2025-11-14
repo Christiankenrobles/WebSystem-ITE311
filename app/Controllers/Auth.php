@@ -32,15 +32,8 @@ class Auth extends BaseController
                 'user_id' => $user['id'],
                 'role' => $user['role'],
             ]);
-            if ($user['role'] === 'student') {
-                return redirect()->to(base_url('dashboard'));
-            } elseif ($user['role'] === 'teacher') {
-                return redirect()->to(base_url('teacher/dashboard'));
-            } elseif ($user['role'] === 'admin') {
-                return redirect()->to(base_url('admin/dashboard'));
-            } else {
-                return redirect()->to(base_url('dashboard'));
-            }
+            // All roles use the same unified dashboard
+            return redirect()->to(base_url('dashboard'));
         }
 
         return redirect()->back()->with('login_error', 'Invalid credentials');
