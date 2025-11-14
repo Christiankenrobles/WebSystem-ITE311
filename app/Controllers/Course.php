@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\NotificationModel;
+
 class Course extends BaseController
 {
     protected $helpers = ['url'];
@@ -32,6 +34,8 @@ class Course extends BaseController
 
         $userId = $session->get('user_id');
         $enrollmentModel = new \App\Models\EnrollmentModel();
+        $courseModel = new \App\Models\CourseModel();
+        $notificationModel = new NotificationModel();
 
         // Check if already enrolled
         $existingEnrollment = $enrollmentModel
@@ -47,6 +51,17 @@ class Course extends BaseController
                 ]);
         }
 
+        // Get course information
+        $course = $courseModel->find($courseId);
+        if (!$course) {
+            return $this->response
+                ->setJSON([
+                    'success' => false,
+                    'message' => 'Course not found'
+                ])
+                ->setStatusCode(404);
+        }
+
         // Insert new enrollment
         $data = [
             'user_id' => $userId,
@@ -56,6 +71,11 @@ class Course extends BaseController
 
         try {
             if ($enrollmentModel->insert($data)) {
+                // Create a notification for the student
+                $courseName = $course['title'] ?? $course['name'] ?? 'Unknown Course';
+                $message = "You have been successfully enrolled in the course: <strong>$courseName</strong>";
+                $notificationModel->createNotification($userId, $message);
+
                 return $this->response
                     ->setJSON([
                         'success' => true,
