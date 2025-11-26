@@ -26,7 +26,10 @@ $routes->get('/register', 'Auth::register');
 $routes->post('/register', 'Auth::store');
 
 // Course Enrollment
+$routes->get('/courses', 'Course::index');
 $routes->post('/course/enroll', 'Course::enroll');
+$routes->get('/course/search', 'Course::search');
+$routes->post('/course/search', 'Course::search');
 
 // Materials
 $routes->get('/materials/upload/(:num)', 'Materials::upload/$1');

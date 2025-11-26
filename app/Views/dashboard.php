@@ -22,6 +22,31 @@
         </div>
     </div>
 
+    <!-- Search Interface Section -->
+    <div class="card shadow-sm border-0 mt-4 bg-light">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="fas fa-search text-primary"></i> Search Courses
+            </h5>
+            <form method="GET" action="<?= site_url('course/search') ?>" id="search-form" class="w-100">
+                <div class="input-group input-group-lg">
+                    <input type="text" class="form-control border-2" id="search-input" name="q" 
+                           placeholder="Search courses by title or description..." 
+                           autocomplete="off" aria-label="Search courses">
+                    <button class="btn btn-primary" type="submit" id="search-btn">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+                <small class="text-muted mt-2 d-block">
+                    <i class="fas fa-info-circle"></i> Tip: Search by course name (e.g., "PHP", "Web") or keywords
+                </small>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Suggestions (AJAX Autocomplete) -->
+    <div id="search-suggestions" class="position-relative mt-0"></div>
+
     <!-- Admin Dashboard Section -->
     <?php if (session('role') === 'admin'): ?>
         <div class="mb-4">
@@ -325,6 +350,82 @@
                         $(this).remove();
                     });
                 }, 4000);
+            }
+
+            // Search autocomplete functionality
+            var searchTimeout;
+            var lastSearchQuery = '';
+            
+            $('#search-input').on('keyup', function() {
+                clearTimeout(searchTimeout);
+                var query = $(this).val().trim();
+                
+                if (query.length < 2) {
+                    $('#search-suggestions').html('');
+                    return;
+                }
+                
+                searchTimeout = setTimeout(function() {
+                    $.ajax({
+                        type: 'GET',
+                        url: '<?= base_url('course/search') ?>',
+                        data: {q: query},
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success && response.results && response.results.length > 0) {
+                                var suggestionHtml = '<div class="list-group position-absolute w-100 mt-1 shadow-sm" style="max-height: 300px; overflow-y: auto; z-index: 1000;">';
+                                
+                                var limitedResults = response.results.slice(0, 5);
+                                
+                                limitedResults.forEach(function(course) {
+                                    suggestionHtml += '<a href="#" class="list-group-item list-group-item-action search-suggestion-item" data-course-id="' + course.id + '" data-course-title="' + escapeHtml(course.title) + '">' +
+                                        '<div class="d-flex w-100 justify-content-between">' +
+                                        '<strong>' + highlightMatch(course.title, query) + '</strong>' +
+                                        '</div>' +
+                                        '<small class="text-muted">' + course.description.substring(0, 50) + '...</small>' +
+                                        '</a>';
+                                });
+                                
+                                suggestionHtml += '</div>';
+                                $('#search-suggestions').html(suggestionHtml);
+                            }
+                        }
+                    });
+                }, 300);
+            });
+
+            // Handle suggestion click
+            $(document).on('click', '.search-suggestion-item', function(e) {
+                e.preventDefault();
+                var courseTitle = $(this).data('course-title');
+                $('#search-input').val(courseTitle);
+                $('#search-suggestions').html('');
+                $('#search-form').submit();
+            });
+
+            // Hide suggestions when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#search-input, #search-suggestions').length) {
+                    $('#search-suggestions').html('');
+                }
+            });
+
+            // Helper function to escape HTML
+            function escapeHtml(text) {
+                var map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            }
+
+            // Helper function to highlight search matches
+            function highlightMatch(text, query) {
+                var regex = new RegExp('(' + query + ')', 'gi');
+                return text.replace(regex, '<mark>$1</mark>');
             }
         });
     </script>
