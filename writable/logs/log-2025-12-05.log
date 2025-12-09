@@ -1,0 +1,112 @@
+CRITICAL - 2025-12-05 06:11:25 --> ErrorException: Undefined variable $low_stock_count
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 17.
+ 1 APPPATH\Views\auth\dashboard.php(17): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $low_stock_count', 'C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php', 17)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 5 APPPATH\Controllers\AuthController.php(78): view('auth/dashboard', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\AuthController->dashboard()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(37): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-05 06:13:36 --> ErrorException: Undefined variable $low_stock_count
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 17.
+ 1 APPPATH\Views\auth\dashboard.php(17): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $low_stock_count', 'C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php', 17)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 5 APPPATH\Controllers\AuthController.php(78): view('auth/dashboard', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\AuthController->dashboard()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(37): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-12-05 06:14:36 --> ErrorException: Undefined variable $low_stock_count
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 17.
+ 1 APPPATH\Views\auth\dashboard.php(17): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $low_stock_count', 'C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php', 17)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 5 APPPATH\Controllers\AuthController.php(78): view('auth/dashboard', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\AuthController->dashboard()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(37): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-12-05 06:15:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-12-05 06:15:12 --> ErrorException: Undefined variable $low_stock_count
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 17.
+ 1 APPPATH\Views\auth\dashboard.php(17): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $low_stock_count', 'C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php', 17)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 5 APPPATH\Controllers\AuthController.php(78): view('auth/dashboard', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\AuthController->dashboard()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(37): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-12-05 06:17:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-12-05 06:17:08 --> ErrorException: Undefined variable $low_stock_count
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 17.
+ 1 APPPATH\Views\auth\dashboard.php(17): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $low_stock_count', 'C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php', 17)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 5 APPPATH\Controllers\AuthController.php(78): view('auth/dashboard', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\AuthController->dashboard()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(37): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-12-05 06:17:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-12-05 06:17:48 --> ErrorException: Undefined variable $low_stock_count
+[Method: GET, Route: dashboard]
+in APPPATH\Views\auth\dashboard.php on line 17.
+ 1 APPPATH\Views\auth\dashboard.php(17): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $low_stock_count', 'C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php', 17)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\xampp\\htdocs\\FISHING\\app\\Views\\auth\\dashboard.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('auth/dashboard', [], true)
+ 5 APPPATH\Controllers\AuthController.php(78): view('auth/dashboard', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\AuthController->dashboard()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(37): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-12-05 06:20:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:20:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:21:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:21:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:21:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:21:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:21:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:22:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:22:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:22:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:22:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:22:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:25:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:26:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:26:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:26:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-12-05 06:26:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
