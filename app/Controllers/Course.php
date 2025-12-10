@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\NotificationModel;
+use App\Models\CourseModel;
+use App\Models\UserModel;
 
 class Course extends BaseController
 {
@@ -107,6 +109,106 @@ class Course extends BaseController
                     'message' => 'Error performing search: ' . $e->getMessage(),
                     'results' => []
                 ]);
+        }
+    }
+
+    /**
+     * Create a new course (accepts JSON or form data)
+     * Expected fields: course_name, course_code, description, academic_year, semester, term,
+     * schedule, assigned_teacher (name or id), status
+     */
+    public function create()
+    {
+        $session = session();
+        if (!$session->get('isLoggedIn')) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'success' => false,
+                'message' => 'User not logged in',
+            ]);
+        }
+
+        // Only allow teachers or admins to create courses
+        $role = $session->get('role');
+        if (!in_array($role, ['admin', 'teacher'])) {
+            return $this->response->setStatusCode(403)->setJSON([
+                'success' => false,
+                'message' => 'Insufficient permissions to create courses'
+            ]);
+        }
+
+        // Accept JSON payload or fallback to POST
+        $input = $this->request->getJSON(true);
+        if (empty($input) || !is_array($input)) {
+            $input = $this->request->getPost();
+        }
+
+        $courseName = isset($input['course_name']) ? trim($input['course_name']) : '';
+        $courseCode = isset($input['course_code']) ? trim($input['course_code']) : '';
+        $description = isset($input['description']) ? trim($input['description']) : '';
+
+        if (empty($courseName) || empty($courseCode)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'success' => false,
+                'message' => 'Course name and code are required'
+            ]);
+        }
+
+        // Try to resolve assigned teacher to an ID
+        $assignedTeacher = $input['assigned_teacher'] ?? null;
+        $instructorId = null;
+        if (!empty($assignedTeacher)) {
+            $userModel = new UserModel();
+
+            // If numeric, treat as user id
+            if (is_numeric($assignedTeacher)) {
+                $possible = $userModel->find((int)$assignedTeacher);
+                if ($possible) {
+                    $instructorId = $possible['id'];
+                }
+            } else {
+                // Try to find by exact name first, then by email if looks like an email
+                if (filter_var($assignedTeacher, FILTER_VALIDATE_EMAIL)) {
+                    $possible = $userModel->where('email', $assignedTeacher)->first();
+                    if ($possible) $instructorId = $possible['id'];
+                } else {
+                    $possible = $userModel->like('name', $assignedTeacher)->first();
+                    if ($possible) $instructorId = $possible['id'];
+                }
+            }
+        }
+
+        $courseModel = new CourseModel();
+
+        $data = [
+            'title' => $courseName,
+            'description' => $description,
+            'instructor_id' => $instructorId,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        try {
+            $insertId = $courseModel->insert($data);
+            if ($insertId === false) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to insert course',
+                    'errors' => $courseModel->errors()
+                ]);
+            }
+
+            $created = $courseModel->find($insertId);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Course created',
+                'course' => $created
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'success' => false,
+                'message' => 'Error creating course: ' . $e->getMessage()
+            ]);
         }
     }
 

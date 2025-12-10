@@ -219,11 +219,11 @@
                 <?php if (!empty($availableCourses)): ?>
                     <?php foreach ($availableCourses as $course): ?>
                         <div class="col-md-4 mb-3">
-                            <div class="card">
-                                <div class="card-body">
+                            <div class="card h-100">
+                                <div class="card-body d-flex flex-column">
                                     <h5 class="card-title"><?= esc($course['title']) ?></h5>
-                                    <p class="card-text"><?= esc($course['description']) ?></p>
-                                    <button type="button" class="btn btn-primary enroll-btn" data-course-id="<?= $course['id'] ?>">Enroll</button>
+                                    <p class="card-text flex-grow-1"><?= esc($course['description']) ?></p>
+                                    <button type="button" class="btn btn-primary enroll-btn mt-auto" data-course-id="<?= $course['id'] ?>" style="cursor: pointer; z-index: 10;">Enroll</button>
                                 </div>
                             </div>
                         </div>
@@ -235,198 +235,296 @@
         </div>
     <?php endif; ?>
 
+
     <script>
-        $(document).ready(function() {
-            console.log('Dashboard script loaded');
+        // Wait for DOM to be fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupEnrollment);
+        } else {
+            setupEnrollment();
+        }
+
+        function setupEnrollment() {
+            console.log('Setting up enrollment buttons...');
             
-            // Handle enrollment button clicks
-            $(document).on('click', '.enroll-btn', function(e) {
-                console.log('Enroll button clicked');
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
+            // Get all enroll buttons
+            const enrollButtons = document.querySelectorAll('.enroll-btn');
+            console.log('Found ' + enrollButtons.length + ' enroll buttons');
+            
+            if (enrollButtons.length === 0) {
+                console.warn('No enroll buttons found on page');
+                return;
+            }
+            
+            enrollButtons.forEach((button, index) => {
+                console.log('Attaching listener to button ' + (index + 1));
                 
-                var $button = $(this);
-                var courseId = $button.data('course-id');
-                
-                console.log('Course ID:', courseId);
-                
-                if (!courseId) {
-                    alert('Invalid course ID');
-                    return false;
-                }
-                
-                // Disable button and show loading state
-                $button.prop('disabled', true);
-                var originalText = $button.text();
-                $button.text('Enrolling...');
-                
-                // Make AJAX request
-                $.ajax({
-                    type: 'POST',
-                    url: '<?= base_url('course/enroll') ?>',
-                    dataType: 'json',
-                    data: {
-                        course_id: courseId
-                    },
-                    success: function(response) {
-                        console.log('Success response:', response);
-                        
-                        if (response.success) {
-                            // Get course details
-                            var $card = $button.closest('.card');
-                            var courseTitle = $card.find('.card-title').text();
-                            var courseDesc = $card.find('.card-text').text();
-                            var $courseCol = $button.closest('.col-md-4');
-                            var currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
-                            
-                            // Show success notification
-                            showNotification('Success', response.message, 'success');
-                            
-                            // Update button
-                            $button.html('✓ Enrolled').removeClass('btn-primary').addClass('btn-success').prop('disabled', true);
-                            
-                            // Add to enrolled courses
-                            var enrolledHtml = '<div class="list-group-item">' +
-                                '<h5 class="mb-1">' + courseTitle + '</h5>' +
-                                '<p class="mb-1">' + courseDesc + '</p>' +
-                                '<small>Enrolled on: ' + currentDate + '</small>' +
-                                '<div class="mt-3">' +
-                                '<a href="<?= base_url('materials/list/') ?>' + courseId + '" class="btn btn-primary btn-sm">View Materials</a>' +
-                                '</div>' +
-                                '</div>';
-                            
-                            var $enrolledList = $('#enrolled-courses');
-                            
-                            // Remove "No enrolled courses" message if it exists
-                            $enrolledList.find('.list-group-item:contains("No enrolled courses")').remove();
-                            
-                            // Add new enrolled course
-                            $enrolledList.append(enrolledHtml);
-                            
-                            // Remove from available courses
-                            $courseCol.fadeOut(400, function() {
-                                $(this).remove();
-                                
-                                // Check if available courses section is empty
-                                var remainingCourses = $('#available-courses .col-md-4').length;
-                                if (remainingCourses === 0) {
-                                    $('#available-courses').html('<p class="text-muted">No available courses.</p>');
-                                }
-                            });
-                        } else {
-                            showNotification('Info', response.message, 'warning');
-                            $button.prop('disabled', false).text(originalText);
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.error('AJAX Error:', textStatus, errorThrown, jqXHR);
-                        
-                        var errorMsg = 'An error occurred. Please try again.';
-                        if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-                            errorMsg = jqXHR.responseJSON.message;
-                        }
-                        
-                        showNotification('Error', errorMsg, 'danger');
-                        $button.prop('disabled', false).text(originalText);
-                    }
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    handleEnrollClick.call(this);
                 });
-                
-                return false;
             });
             
-            // Helper function to show notifications
-            function showNotification(title, message, type) {
-                var alertClass = 'alert-' + type;
-                var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; width: 350px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">' +
-                    '<strong>' + title + ':</strong> ' + message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                    '</div>';
-                
-                $('body').prepend(alertHtml);
-                
-                setTimeout(function() {
-                    $('.alert-' + type).fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                }, 4000);
-            }
+            console.log('Enrollment setup complete');
+        }
 
-            // Search autocomplete functionality
-            var searchTimeout;
-            var lastSearchQuery = '';
+        function handleEnrollClick() {
+            console.log('=== ENROLL BUTTON CLICKED ===');
+            const button = this;
+            const courseId = button.getAttribute('data-course-id');
             
-            $('#search-input').on('keyup', function() {
-                clearTimeout(searchTimeout);
-                var query = $(this).val().trim();
+            console.log('Course ID from data attribute:', courseId);
+            
+            if (!courseId) {
+                alert('Error: Could not find course ID');
+                return;
+            }
+            
+            // Disable button immediately
+            button.disabled = true;
+            const originalText = button.textContent;
+            button.textContent = 'Enrolling...';
+            
+            console.log('Sending enrollment request for course:', courseId);
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const csrfHeader = 'X-CSRF-TOKEN'; // CodeIgniter default header name
+            
+            console.log('CSRF Token:', csrfToken ? 'Found' : 'Not found');
+            
+            // Send POST request
+            fetch('<?= base_url('course/enroll') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(csrfToken && { [csrfHeader]: csrfToken })
+                },
+                body: 'course_id=' + encodeURIComponent(courseId)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
                 
-                if (query.length < 2) {
-                    $('#search-suggestions').html('');
+                if (data.success) {
+                    console.log('✓ Enrollment successful!');
+                    
+                    // Get course card details
+                    const card = button.closest('.card');
+                    const courseTitle = card.querySelector('.card-title').textContent.trim();
+                    const courseDesc = card.querySelector('.card-text').textContent.trim();
+                    const courseCol = button.closest('.col-md-4');
+                    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                    
+                    console.log('Course details - Title:', courseTitle);
+                    
+                    // Update button
+                    button.textContent = '✓ Enrolled';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-success');
+                    button.disabled = true;
+                    
+                    // Create enrolled course HTML
+                    const enrolledHtml = `
+                        <div class="list-group-item">
+                            <h5 class="mb-1">${courseTitle}</h5>
+                            <p class="mb-1">${courseDesc}</p>
+                            <small>Enrolled on: ${currentDate}</small>
+                            <div class="mt-3">
+                                <a href="<?= base_url('materials/list/') ?>${courseId}" class="btn btn-primary btn-sm">View Materials</a>
+                            </div>
+                        </div>
+                    `;
+                    
+                    console.log('Enrolled HTML created');
+                    
+                    // Add to enrolled courses list
+                    const enrolledList = document.getElementById('enrolled-courses');
+                    console.log('Enrolled list element:', enrolledList ? 'Found' : 'Not found');
+                    
+                    if (enrolledList) {
+                        // Remove "No enrolled courses yet" message
+                        const noCoursesMsg = Array.from(enrolledList.querySelectorAll('.list-group-item')).find(item => 
+                            item.textContent.trim() === 'No enrolled courses yet.'
+                        );
+                        
+                        if (noCoursesMsg) {
+                            console.log('Removing "no courses" message');
+                            noCoursesMsg.remove();
+                        }
+                        
+                        // Add new enrolled course at the top
+                        console.log('Adding course to enrolled list');
+                        enrolledList.insertAdjacentHTML('afterbegin', enrolledHtml);
+                    }
+                    
+                    // Fade out and remove available course
+                    console.log('Removing from available courses');
+                    courseCol.style.transition = 'opacity 0.4s ease-out';
+                    courseCol.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        courseCol.remove();
+                        
+                        // Check if all courses are enrolled
+                        const remainingCourses = document.querySelectorAll('#available-courses .col-md-4').length;
+                        console.log('Remaining available courses:', remainingCourses);
+                        
+                        if (remainingCourses === 0) {
+                            document.getElementById('available-courses').innerHTML = '<p class="text-muted">No available courses.</p>';
+                        }
+                    }, 400);
+                    
+                    // Show success message
+                    showNotification('Success!', data.message, 'success');
+                    
+                } else {
+                    console.error('Enrollment failed:', data.message);
+                    showNotification('Error', data.message || 'Enrollment failed', 'danger');
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Network error:', error);
+                showNotification('Error', 'Network error: ' + error.message, 'danger');
+                button.disabled = false;
+                button.textContent = originalText;
+            });
+        }
+
+        function showNotification(title, message, type) {
+            console.log('Showing notification:', type, title, message);
+            
+            const alertClass = 'alert-' + type;
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert" 
+                     style="position: fixed; top: 20px; right: 20px; z-index: 9999; width: 400px; box-shadow: 0 4px 8px rgba(0,0,0,0.15);">
+                    <strong>${title}</strong> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert-' + type);
+                if (alert) {
+                    alert.style.transition = 'opacity 0.3s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Debug: Log when page loads
+        console.log('Dashboard script loaded');
+        console.log('Current URL:', window.location.href);
+
+        // Initialize search autocomplete
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            console.log('Search input found, initializing autocomplete');
+            let searchTimeout;
+            
+            searchInput.addEventListener('keyup', function() {
+                console.log('Search input changed:', this.value);
+                
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+                const suggestionsDiv = document.getElementById('search-suggestions');
+                
+                // Clear suggestions if query is too short
+                if (query.length < 1) {
+                    suggestionsDiv.innerHTML = '';
                     return;
                 }
                 
-                searchTimeout = setTimeout(function() {
-                    $.ajax({
-                        type: 'GET',
-                        url: '<?= base_url('course/search') ?>',
-                        data: {q: query},
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.success && response.results && response.results.length > 0) {
-                                var suggestionHtml = '<div class="list-group position-absolute w-100 mt-1 shadow-sm" style="max-height: 300px; overflow-y: auto; z-index: 1000;">';
+                // Delay search to avoid too many requests
+                searchTimeout = setTimeout(() => {
+                    console.log('Performing search for:', query);
+                    
+                    fetch('<?= base_url('course/search') ?>?q=' + encodeURIComponent(query), {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => {
+                            console.log('Search response status:', response.status);
+                            if (!response.ok) {
+                                throw new Error('Search failed with status ' + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Search results:', data);
+                            
+                            if (data.success && data.results && data.results.length > 0) {
+                                console.log('Found ' + data.results.length + ' courses');
                                 
-                                var limitedResults = response.results.slice(0, 5);
+                                let suggestionsHtml = '<div class="list-group position-absolute w-100 shadow-lg" style="z-index: 1000; max-height: 400px; overflow-y: auto; top: 100%; left: 0;">';
                                 
-                                limitedResults.forEach(function(course) {
-                                    suggestionHtml += '<a href="#" class="list-group-item list-group-item-action search-suggestion-item" data-course-id="' + course.id + '" data-course-title="' + escapeHtml(course.title) + '">' +
-                                        '<div class="d-flex w-100 justify-content-between">' +
-                                        '<strong>' + highlightMatch(course.title, query) + '</strong>' +
-                                        '</div>' +
-                                        '<small class="text-muted">' + course.description.substring(0, 50) + '...</small>' +
-                                        '</a>';
+                                data.results.forEach(course => {
+                                    const highlighted = course.title.replace(
+                                        new RegExp(query, 'gi'),
+                                        '<mark>$&</mark>'
+                                    );
+                                    
+                                    suggestionsHtml += `
+                                        <a href="#" class="list-group-item list-group-item-action search-suggestion" 
+                                           data-course-id="${course.id}" data-course-title="${course.title}">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <strong>${highlighted}</strong>
+                                            </div>
+                                            <small class="text-muted">${course.description.substring(0, 60)}...</small>
+                                        </a>
+                                    `;
                                 });
                                 
-                                suggestionHtml += '</div>';
-                                $('#search-suggestions').html(suggestionHtml);
+                                suggestionsHtml += '</div>';
+                                suggestionsDiv.innerHTML = suggestionsHtml;
+                                
+                                // Attach click handlers to suggestions
+                                document.querySelectorAll('.search-suggestion').forEach(item => {
+                                    item.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        const courseTitle = this.getAttribute('data-course-title');
+                                        searchInput.value = courseTitle;
+                                        suggestionsDiv.innerHTML = '';
+                                        document.getElementById('search-form').submit();
+                                    });
+                                });
+                            } else if (data.success) {
+                                console.log('No courses found');
+                                suggestionsDiv.innerHTML = '<div class="alert alert-info mt-2">No courses found matching "' + query + '"</div>';
+                            } else {
+                                console.error('Search returned error:', data.message);
+                                suggestionsDiv.innerHTML = '<div class="alert alert-warning mt-2">Error: ' + (data.message || 'Unknown error') + '</div>';
                             }
-                        }
-                    });
+                        })
+                        .catch(error => {
+                            console.error('Search error:', error);
+                            suggestionsDiv.innerHTML = '<div class="alert alert-danger mt-2">Error searching courses: ' + error.message + '</div>';
+                        });
                 }, 300);
             });
-
-            // Handle suggestion click
-            $(document).on('click', '.search-suggestion-item', function(e) {
-                e.preventDefault();
-                var courseTitle = $(this).data('course-title');
-                $('#search-input').val(courseTitle);
-                $('#search-suggestions').html('');
-                $('#search-form').submit();
-            });
-
-            // Hide suggestions when clicking outside
-            $(document).on('click', function(e) {
-                if (!$(e.target).closest('#search-input, #search-suggestions').length) {
-                    $('#search-suggestions').html('');
+            
+            // Clear suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#search-input') && !e.target.closest('#search-suggestions')) {
+                    document.getElementById('search-suggestions').innerHTML = '';
                 }
             });
-
-            // Helper function to escape HTML
-            function escapeHtml(text) {
-                var map = {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                };
-                return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-            }
-
-            // Helper function to highlight search matches
-            function highlightMatch(text, query) {
-                var regex = new RegExp('(' + query + ')', 'gi');
-                return text.replace(regex, '<mark>$1</mark>');
-            }
-        });
+        } else {
+            console.warn('Search input not found');
+        }
     </script>
+
 <?= $this->endSection() ?>

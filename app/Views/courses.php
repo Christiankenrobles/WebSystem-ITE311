@@ -3,7 +3,7 @@ $this->extend('template');
 $this->section('content');
 ?>
 
-<div class="container-fluid mt-4">
+<div class="catalog-container mt-4">
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -182,9 +182,9 @@ $this->section('content');
                     <!-- Course Footer -->
                     <div class="card-footer bg-white border-top">
                         <div class="d-grid gap-2">
-                            <a href="<?= site_url('dashboard') ?>" class="btn btn-primary btn-sm enroll-course-btn" data-course-id="<?= $course['id'] ?>">
+                            <button type="button" class="btn btn-primary btn-sm enroll-course-btn" data-course-id="<?= $course['id'] ?>">
                                 <i class="fas fa-plus-circle"></i> Enroll Now
-                            </a>
+                            </button>
                             <a href="#" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-eye"></i> View Details
                             </a>
@@ -295,10 +295,9 @@ $this->section('content');
 <!-- CSS Styles -->
 <style>
     /* View Switching */
+    /* Use Bootstrap row/col layout for predictable spacing */
     .courses-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
+        display: block;
     }
 
     .courses-grid.hide {
@@ -337,6 +336,15 @@ $this->section('content');
         border-radius: 8px;
         overflow: hidden;
     }
+
+    /* Card header refinement */
+    .course-card .card-header {
+        background: linear-gradient(90deg, rgba(13,110,253,0.12), rgba(13,110,253,0.06));
+        border-bottom: 0;
+        padding: 0.65rem 1rem;
+    }
+
+    .course-card .card-title { font-size: 1rem; color: #0b5ed7; font-weight: 600; }
 
     .course-card:hover .card-title {
         color: #0056b3;

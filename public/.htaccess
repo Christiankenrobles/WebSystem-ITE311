@@ -1,0 +1,32 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # This site is served from the subfolder "/ITE311-ROBLES".
+    # Ensure rewrite base matches that path so URLs like
+    # /ITE311-ROBLES/login are routed to the front controller.
+    RewriteBase /ITE311-ROBLES/
+
+    # If the request maps to an existing file or directory, serve it directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Avoid rewriting index.php itself
+    RewriteCond %{REQUEST_URI} !^/ITE311-ROBLES/index\.php [NC]
+
+    # Route everything else to the front controller
+    RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "^(env|\.env|\.htaccess|composer\.json)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Allow directory listings to be off but do not deny access globally
+Options -Indexes

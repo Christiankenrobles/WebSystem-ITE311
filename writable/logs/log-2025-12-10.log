@@ -1,0 +1,25 @@
+ERROR - 2025-12-10 18:32:13 --> mysqli_sql_exception: Table 'materials' already exists in C:\xampp\htdocs\ITE311-ROBLES\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\ITE311-ROBLES\system\Database\MySQLi\Connection.php(327): mysqli->query()
+#1 C:\xampp\htdocs\ITE311-ROBLES\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute()
+#2 C:\xampp\htdocs\ITE311-ROBLES\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery()
+#3 C:\xampp\htdocs\ITE311-ROBLES\system\Database\Forge.php(570): CodeIgniter\Database\BaseConnection->query()
+#4 C:\xampp\htdocs\ITE311-ROBLES\app\Database\Migrations\2025-11-13-180347_CreateMaterialsTable.php(37): CodeIgniter\Database\Forge->createTable()
+#5 C:\xampp\htdocs\ITE311-ROBLES\system\Database\MigrationRunner.php(876): App\Database\Migrations\CreateMaterialsTable->up()
+#6 C:\xampp\htdocs\ITE311-ROBLES\system\Database\MigrationRunner.php(182): CodeIgniter\Database\MigrationRunner->migrate()
+#7 C:\xampp\htdocs\ITE311-ROBLES\system\Commands\Database\Migrate.php(85): CodeIgniter\Database\MigrationRunner->latest()
+#8 C:\xampp\htdocs\ITE311-ROBLES\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\Migrate->run()
+#9 C:\xampp\htdocs\ITE311-ROBLES\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run()
+#10 C:\xampp\htdocs\ITE311-ROBLES\system\Boot.php(388): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ITE311-ROBLES\system\Boot.php(133): CodeIgniter\Boot::runCommand()
+#12 C:\xampp\htdocs\ITE311-ROBLES\spark(87): CodeIgniter\Boot::bootSpark()
+#13 {main}
+CRITICAL - 2025-12-10 20:02:08 --> ArgumentCountError: Too few arguments to function App\Controllers\Users::delete(), 0 passed in C:\xampp\htdocs\ITE311-ROBLES\system\CodeIgniter.php on line 933 and exactly 1 expected
+[Method: POST, Route: users/delete]
+in APPPATH\Controllers\Users.php on line 104.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Users->delete()
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Users))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
