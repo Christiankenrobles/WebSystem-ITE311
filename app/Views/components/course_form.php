@@ -15,12 +15,16 @@
                 <div class="col-12 col-md-6">
                     <label for="course_name" class="form-label">Course Name</label>
                     <input id="course_name" name="course_name" class="form-control" required
+                           pattern="[A-Za-z0-9 _-]+"
+                           title="Special characters are not allowed. Only letters, numbers, spaces, hyphen (-) and underscore (_) are allowed."
                            value="Introduction to Information Technology">
                 </div>
 
                 <div class="col-12 col-md-6">
                     <label for="course_code" class="form-label">Course Code</label>
                     <input id="course_code" name="course_code" class="form-control" required
+                           pattern="[A-Za-z0-9-]+"
+                           title="Special characters are not allowed. Only letters, numbers, and hyphen (-) are allowed."
                            value="IT-101">
                 </div>
 
@@ -62,9 +66,8 @@
                 <div class="col-12 col-md-4">
                     <label for="assigned_teacher" class="form-label">Assigned Teacher</label>
                     <select id="assigned_teacher" name="assigned_teacher" class="form-select" required>
-                        <option value="Alice Instructor" selected>Alice Instructor</option>
-                        <option value="Bob Teacher">Bob Teacher</option>
-                        <option value="Carol Lecturer">Carol Lecturer</option>
+                        <option value="alice.instructor@example.com" selected>Alice Instructor</option>
+                        <option value="bob.instructor@example.com">Bob Instructor</option>
                     </select>
                 </div>
 
@@ -139,28 +142,48 @@
         }
 
         try {
+            const form = document.getElementById('courseForm');
+            const formData = new FormData(form);
+
+            // Append payload fields (keeps CSRF field already in the form)
+            Object.entries(payload).forEach(([k, v]) => formData.set(k, v));
+
             const res = await fetch('<?= site_url('course/create') ?>', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    '<?= csrf_header() ?>': '<?= csrf_token() ?>'
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify(payload)
+                body: formData
             });
 
-            const data = await res.json().catch(()=>({success: false, message: 'Invalid response'}));
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                data = { success: false, message: text || ('HTTP ' + res.status) };
+            }
 
-            if (data && data.success) {
+            if (res.ok && data && data.success) {
                 showNotification('Course saved successfully!', 'success');
-                // Optionally clear form or redirect
-                // document.getElementById('courseForm').reset();
+
+                // Reset the form (clears layout)
+                form.reset();
+
+                // Close modal if the form is inside the Create Course modal
+                const modalEl = document.getElementById('createCourseModal');
+                if (modalEl && window.bootstrap && bootstrap.Modal) {
+                    const instance = bootstrap.Modal.getInstance(modalEl);
+                    if (instance) {
+                        instance.hide();
+                    }
+                }
             } else {
-                showNotification(data.message || 'Failed to save course', 'error');
+                showNotification((data && data.message ? data.message : 'Failed to save course') + ' (HTTP ' + res.status + ')', 'error');
             }
         } catch (err) {
             console.error(err);
-            showNotification('Error saving course', 'error');
+            showNotification('Error saving course: ' + (err?.message || 'Unknown error'), 'error');
         } finally {
             btn.disabled = false;
         }

@@ -84,6 +84,21 @@
                     </li>
                     <?php endif; ?>
 
+                    <?php if (session()->get('role') !== 'admin'): ?>
+                    <!-- Notifications (Students & Teachers Only) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="position-relative" style="display: inline-block;">
+                                <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;"></span>
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: 360px; max-height: 420px; overflow-y: auto;" id="notificationDropdownMenu">
+                            <li><span class="dropdown-item text-muted">Loading...</span></li>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+
                     <!-- User Profile Dropdown -->
                     <li class="nav-item nav-item-profile">
                         <button class="nav-link profile-btn" id="profileBtn" aria-label="User profile">

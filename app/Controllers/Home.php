@@ -301,8 +301,6 @@ class Home extends BaseController
         }
 
         $enrollmentModel = new \App\Models\EnrollmentModel();
-        $courseModel = new \App\Models\CourseModel();
-        $userModel = new \App\Models\UserModel();
 
         // Get all enrollments with details
         $enrollments = $enrollmentModel->db->table('enrollments')
@@ -320,9 +318,8 @@ class Home extends BaseController
         $totalEnrollments = count($enrollments);
         $uniqueStudents = count(array_unique(array_column($enrollments, 'user_id')));
         $uniqueCourses = count(array_unique(array_column($enrollments, 'course_id')));
-        
+
         // Enrollments by course
-        $enrollmentsByCourse = [];
         $courseEnrollmentCounts = [];
         foreach ($enrollments as $enrollment) {
             $courseId = $enrollment['course_id'];
@@ -334,7 +331,9 @@ class Home extends BaseController
             }
             $courseEnrollmentCounts[$courseId]['count']++;
         }
-        arsort($courseEnrollmentCounts);
+        uasort($courseEnrollmentCounts, function ($a, $b) {
+            return ($b['count'] ?? 0) <=> ($a['count'] ?? 0);
+        });
         $topCourses = array_slice($courseEnrollmentCounts, 0, 5, true);
 
         // Enrollments by day (last 7 days)
@@ -368,7 +367,9 @@ class Home extends BaseController
             }
             $studentEnrollmentCounts[$studentId]['count']++;
         }
-        arsort(array_column($studentEnrollmentCounts, 'count'));
+        uasort($studentEnrollmentCounts, function ($a, $b) {
+            return ($b['count'] ?? 0) <=> ($a['count'] ?? 0);
+        });
         $topStudents = array_slice($studentEnrollmentCounts, 0, 5, true);
 
         // Group enrollments by course for detailed view

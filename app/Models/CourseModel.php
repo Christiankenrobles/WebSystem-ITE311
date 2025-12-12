@@ -31,6 +31,10 @@ class CourseModel extends Model
         return $this->db->table('enrollments')
             ->join('courses', 'enrollments.course_id = courses.id')
             ->where('enrollments.user_id', $userId)
+            ->groupStart()
+                ->where('enrollments.status', 'approved')
+                ->orWhere('enrollments.status IS NULL', null, false)
+            ->groupEnd()
             ->select('courses.*, enrollments.enrollment_date')
             ->get()
             ->getResultArray();
@@ -38,19 +42,20 @@ class CourseModel extends Model
 
     public function getAvailableCourses($userId)
     {
-        $enrolledCourseIds = $this->db->table('enrollments')
-            ->where('user_id', $userId)
-            ->select('course_id')
+        // Return courses not enrolled OR pending, and include enrollment status for the current user
+        return $this->db->table($this->table)
+            ->select('courses.*, enrollments.status as enrollment_status')
+            ->join(
+                'enrollments',
+                "enrollments.course_id = courses.id AND enrollments.user_id = " . (int) $userId,
+                'left'
+            )
+            ->groupStart()
+                ->where('enrollments.status IS NULL', null, false)
+                ->orWhere('enrollments.status', 'pending')
+            ->groupEnd()
             ->get()
             ->getResultArray();
-
-        $enrolledIds = array_column($enrolledCourseIds, 'course_id');
-
-        if (empty($enrolledIds)) {
-            return $this->findAll();
-        }
-
-        return $this->whereNotIn('id', $enrolledIds)->findAll();
     }
 
     /**

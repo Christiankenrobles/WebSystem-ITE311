@@ -59,12 +59,23 @@ class Auth extends BaseController
     public function store()
     {
         $name = trim((string) $this->request->getPost('name'));
+        $username = trim((string) $this->request->getPost('username'));
         $email = trim((string) $this->request->getPost('email'));
         $password = (string) $this->request->getPost('password');
         $passwordConfirm = (string) $this->request->getPost('password_confirm');
 
-        if ($name === '' || $email === '' || $password === '' || $passwordConfirm === '') {
+        if ($name === '' || $username === '' || $email === '' || $password === '' || $passwordConfirm === '') {
             return redirect()->back()->withInput()->with('register_error', 'All fields are required.');
+        }
+
+        // Validate full name: only letters, numbers, spaces, Ñ, ñ
+        if (!preg_match('/^[A-Za-z0-9 ñÑ]+$/', $name)) {
+            return redirect()->back()->withInput()->with('register_error', 'Full Name can only contain letters, numbers, spaces, Ñ, and ñ.');
+        }
+
+        // Validate username: only letters, numbers, underscores, Ñ, ñ
+        if (!preg_match('/^[A-Za-z0-9_ñÑ]+$/', $username)) {
+            return redirect()->back()->withInput()->with('register_error', 'Username can only contain letters, numbers, underscores (_), Ñ, and ñ.');
         }
 
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -77,6 +88,11 @@ class Auth extends BaseController
 
         $userModel = new \App\Models\UserModel();
 
+        // Check for existing username
+        if ($userModel->where('username', $username)->first()) {
+            return redirect()->back()->withInput()->with('register_error', 'Username is already taken.');
+        }
+
         // Check for existing email
         if ($userModel->where('email', $email)->first()) {
             return redirect()->back()->withInput()->with('register_error', 'Email is already registered.');
@@ -86,6 +102,7 @@ class Auth extends BaseController
 
         $userId = $userModel->insert([
             'name' => $name,
+            'username' => $username,
             'email' => $email,
             'role' => 'student',
             'password' => $passwordHash,

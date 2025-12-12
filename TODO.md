@@ -1,6 +1,12 @@
-# TODO: Implement Course Enrollment Feature
+# TODO: Implement Full Name and Username Validation in CodeIgniter 4
 
-- [x] Update app/Config/Routes.php to add POST route for /course/enroll
-- [x] Modify app/Controllers/Home.php dashboard() to pass enrolled and available courses data for students
-- [x] Add jQuery CDN to app/Views/template.php before Bootstrap JS
-- [x] Update app/Views/dashboard.php with enrolled courses section, available courses section with enroll buttons, and AJAX script
+## Completed Tasks
+- [x] Add username field to app/Views/register.php with helper text
+- [x] Update app/Controllers/Auth.php store method to validate full name and username using regex patterns ^[A-Za-z0-9 ñÑ]+$ for full name and ^[A-Za-z0-9_ñÑ]+$ for username
+- [x] Update app/Controllers/Users.php create method to use the same regex patterns for consistency
+- [x] Add validation error messages for invalid characters
+
+## Followup Steps
+- [ ] Test the validation by attempting registration with invalid characters (e.g., special characters like @, #, etc.)
+- [ ] Test with valid characters including Ñ and ñ to ensure they are accepted
+- [ ] Verify that the admin user creation via Users controller also enforces the same rules

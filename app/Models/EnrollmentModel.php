@@ -15,6 +15,7 @@ class EnrollmentModel extends Model
         'user_id',
         'course_id',
         'enrollment_date',
+        'status',
     ];
 
     protected $useTimestamps = false;

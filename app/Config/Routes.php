@@ -47,6 +47,8 @@ $routes->post('/course/import-schedule', 'Course::importSchedule');
 $routes->post('/course/create', 'Course::create');
 
 // Materials
+$routes->get('/admin/course/(:num)/upload', 'Materials::upload/$1');
+$routes->post('/admin/course/(:num)/upload', 'Materials::upload/$1');
 $routes->get('/materials/upload/(:num)', 'Materials::upload/$1');
 $routes->post('/materials/upload/(:num)', 'Materials::upload/$1');
 $routes->get('/materials/delete/(:num)', 'Materials::delete/$1');
@@ -59,10 +61,11 @@ $routes->post('/notifications/mark_read/(:num)', 'Notifications::mark_as_read/$1
 
 // Users Management (Admin)
 $routes->get('/users', 'Users::index');
+$routes->get('/users/add', 'Users::add');
+$routes->post('/users/create', 'Users::create');
 $routes->get('/users/edit/(:num)', 'Users::edit/$1');
 $routes->post('/users/update/(:num)', 'Users::update/$1');
 $routes->post('/users/update-role', 'Users::updateRole');
-$routes->post('/users/create', 'Users::create');
 $routes->post('/users/delete/(:num)', 'Users::delete/$1');
 $routes->post('/users/delete', 'Users::delete');
 $routes->get('/users/search', 'Users::search');

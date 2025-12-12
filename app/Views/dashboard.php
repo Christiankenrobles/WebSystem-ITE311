@@ -52,6 +52,11 @@
         <div class="mb-4">
             <div class="row g-2">
                 <div class="col-auto">
+                    <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createCourseModal">
+                        <i class="fas fa-plus-circle me-2"></i>Create New Course
+                    </button>
+                </div>
+                <div class="col-auto">
                     <a href="<?= base_url('admin/materials') ?>" class="btn btn-success btn-lg">
                         <i class="fas fa-folder-upload me-2"></i>Materials Management
                     </a>
@@ -280,7 +285,9 @@
             <a href="<?= base_url('schedule') ?>" class="btn btn-info btn-lg me-2">
                 <i class="fas fa-calendar-alt me-2"></i>View Schedule
             </a>
-            <a href="#" class="btn btn-success btn-lg">Create New Course</a>
+            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createCourseModal">
+                <i class="fas fa-plus-circle me-2"></i>Create New Course
+            </button>
         </div>
         
         <div class="mt-4">
@@ -375,7 +382,17 @@
                                 <div class="card-body d-flex flex-column">
                                     <h5 class="card-title"><?= esc($course['title']) ?></h5>
                                     <p class="card-text flex-grow-1"><?= esc($course['description']) ?></p>
-                                    <button type="button" class="btn btn-primary enroll-btn mt-auto" data-course-id="<?= $course['id'] ?>" style="cursor: pointer; z-index: 10;">Enroll</button>
+                                    <?php $enrollmentStatus = $course['enrollment_status'] ?? null; ?>
+                                    <?php if ($enrollmentStatus === 'pending'): ?>
+                                        <div class="mb-2">
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        </div>
+                                        <button type="button" class="btn btn-warning enroll-btn mt-auto" data-course-id="<?= $course['id'] ?>" disabled style="cursor: not-allowed; z-index: 10;">
+                                            Pending Approval
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn btn-primary enroll-btn mt-auto" data-course-id="<?= $course['id'] ?>" style="cursor: pointer; z-index: 10;">Enroll</button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -383,6 +400,22 @@
                 <?php else: ?>
                     <p>No available courses.</p>
                 <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (in_array(session('role'), ['admin', 'teacher'], true)): ?>
+        <div class="modal fade" id="createCourseModal" tabindex="-1" aria-labelledby="createCourseModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createCourseModalLabel">Create New Course</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <?= $this->include('components/course_form') ?>
+                    </div>
+                </div>
             </div>
         </div>
     <?php endif; ?>
@@ -464,75 +497,25 @@
                 console.log('Response data:', data);
                 
                 if (data.success) {
-                    console.log('✓ Enrollment successful!');
-                    
-                    // Get course card details
-                    const card = button.closest('.card');
-                    const courseTitle = card.querySelector('.card-title').textContent.trim();
-                    const courseDesc = card.querySelector('.card-text').textContent.trim();
-                    const courseCol = button.closest('.col-md-4');
-                    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
-                    
-                    console.log('Course details - Title:', courseTitle);
-                    
-                    // Update button
-                    button.textContent = '✓ Enrolled';
+                    console.log('✓ Enrollment request submitted!');
+
+                    // Update button to pending state
+                    button.textContent = 'Pending Approval';
                     button.classList.remove('btn-primary');
-                    button.classList.add('btn-success');
+                    button.classList.add('btn-warning');
                     button.disabled = true;
-                    
-                    // Create enrolled course HTML
-                    const enrolledHtml = `
-                        <div class="list-group-item">
-                            <h5 class="mb-1">${courseTitle}</h5>
-                            <p class="mb-1">${courseDesc}</p>
-                            <small>Enrolled on: ${currentDate}</small>
-                            <div class="mt-3">
-                                <a href="<?= base_url('materials/list/') ?>${courseId}" class="btn btn-primary btn-sm">View Materials</a>
-                            </div>
-                        </div>
-                    `;
-                    
-                    console.log('Enrolled HTML created');
-                    
-                    // Add to enrolled courses list
-                    const enrolledList = document.getElementById('enrolled-courses');
-                    console.log('Enrolled list element:', enrolledList ? 'Found' : 'Not found');
-                    
-                    if (enrolledList) {
-                        // Remove "No enrolled courses yet" message
-                        const noCoursesMsg = Array.from(enrolledList.querySelectorAll('.list-group-item')).find(item => 
-                            item.textContent.trim() === 'No enrolled courses yet.'
-                        );
-                        
-                        if (noCoursesMsg) {
-                            console.log('Removing "no courses" message');
-                            noCoursesMsg.remove();
-                        }
-                        
-                        // Add new enrolled course at the top
-                        console.log('Adding course to enrolled list');
-                        enrolledList.insertAdjacentHTML('afterbegin', enrolledHtml);
+                    button.style.cursor = 'not-allowed';
+
+                    // Add/Update pending badge
+                    const cardBody = button.closest('.card-body');
+                    const existingBadge = cardBody.querySelector('.badge.bg-warning');
+                    if (!existingBadge) {
+                        const badgeWrap = document.createElement('div');
+                        badgeWrap.className = 'mb-2';
+                        badgeWrap.innerHTML = '<span class="badge bg-warning text-dark">Pending</span>';
+                        cardBody.insertBefore(badgeWrap, button);
                     }
-                    
-                    // Fade out and remove available course
-                    console.log('Removing from available courses');
-                    courseCol.style.transition = 'opacity 0.4s ease-out';
-                    courseCol.style.opacity = '0';
-                    
-                    setTimeout(() => {
-                        courseCol.remove();
-                        
-                        // Check if all courses are enrolled
-                        const remainingCourses = document.querySelectorAll('#available-courses .col-md-4').length;
-                        console.log('Remaining available courses:', remainingCourses);
-                        
-                        if (remainingCourses === 0) {
-                            document.getElementById('available-courses').innerHTML = '<p class="text-muted">No available courses.</p>';
-                        }
-                    }, 400);
-                    
-                    // Show success message
+
                     showNotification('Success!', data.message, 'success');
                     
                 } else {

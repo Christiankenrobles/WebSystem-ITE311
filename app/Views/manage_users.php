@@ -12,12 +12,14 @@
                 <p class="page-subtitle">Manage system users, roles, and permissions</p>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-primary" id="openAddUserBtn">
-                    <i class="fas fa-user-plus me-2"></i>Add User
-                </button>
                 <a href="<?= base_url('dashboard') ?>" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
                 </a>
+                <?php if (session()->get('role') === 'admin'): ?>
+                <a href="<?= base_url('users/add') ?>" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Add User
+                </a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -214,92 +216,89 @@
             <?php endif; ?>
         </div>
 
-            <!-- Add User Modal -->
-            <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-md modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Add New User</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="addUserForm">
-                                <?= csrf_field() ?>
-                                <div class="mb-3">
-                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="name" id="add_name" class="form-control" required>
-                                    <small class="form-text text-muted">Only letters, numbers, and spaces are allowed. Special characters will be rejected on submit.</small>
-                                    <div class="invalid-feedback" id="name-error"></div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Username <span class="text-danger">*</span></label>
-                                    <input type="text" name="username" id="add_username" class="form-control" required>
-                                    <small class="form-text text-muted">Only letters, numbers, and underscore (_) are allowed. Special characters will be rejected on submit.</small>
-                                    <div class="invalid-feedback" id="username-error"></div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" name="email" id="add_email" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Role</label>
-                                    <select name="role" id="add_role" class="form-select" required>
-                                        <option value="student">Student</option>
-                                        <option value="teacher">Teacher</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Password</label>
-                                    <input type="password" name="password" id="add_password" class="form-control" required minlength="8">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Confirm Password</label>
-                                    <input type="password" name="password_confirm" id="add_password_confirm" class="form-control" required minlength="8">
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" id="submitAddUser" class="btn btn-primary">Create User</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
         <!-- Pagination -->
         <?php if ($totalPages > 1): ?>
             <div class="pagination-container mt-4">
+                <div class="pagination-info mb-2 text-muted">
+                    Showing <?= (($currentPage - 1) * $perPage) + 1 ?> to 
+                    <?= min($currentPage * $perPage, $totalUsers) ?> of 
+                    <?= $totalUsers ?> users
+                </div>
                 <ul class="pagination">
                     <?php if ($currentPage > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=1">
-                                <i class="fas fa-chevron-left"></i> First
+                            <a class="page-link" href="<?= site_url('users?page=1') ?>">
+                                <i class="fas fa-angle-double-left"></i> First
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?= $currentPage - 1 ?>">
-                                <i class="fas fa-chevron-left"></i> Previous
+                            <a class="page-link" href="<?= site_url('users?page=' . ($currentPage - 1)) ?>">
+                                <i class="fas fa-angle-left"></i> Previous
                             </a>
+                        </li>
+                    <?php else: ?>
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                <i class="fas fa-angle-double-left"></i> First
+                            </span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                <i class="fas fa-angle-left"></i> Previous
+                            </span>
                         </li>
                     <?php endif; ?>
 
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <?php 
+                    $startPage = max(1, $currentPage - 2);
+                    $endPage = min($totalPages, $currentPage + 2);
+                    
+                    if ($startPage > 1) {
+                        echo '<li class="page-item"><a class="page-link" href="' . site_url('users?page=1') . '">1</a></li>';
+                        if ($startPage > 2) {
+                            echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        }
+                    }
+                    
+                    for ($i = $startPage; $i <= $endPage; $i++): ?>
                         <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
-                            <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                            <a class="page-link" href="<?= site_url('users?page=' . $i) ?>">
+                                <?= $i ?>
+                            </a>
                         </li>
-                    <?php endfor; ?>
+                    <?php 
+                    endfor;
+                    
+                    if ($endPage < $totalPages) {
+                        if ($endPage < $totalPages - 1) {
+                            echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        }
+                        echo '<li class="page-item"><a class="page-link" href="' . site_url('users?page=' . $totalPages) . '">' . $totalPages . '</a></li>';
+                    }
+                    ?>
 
                     <?php if ($currentPage < $totalPages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?= $currentPage + 1 ?>">
-                                Next <i class="fas fa-chevron-right"></i>
+                            <a class="page-link" href="<?= site_url('users?page=' . ($currentPage + 1)) ?>">
+                                Next <i class="fas fa-angle-right"></i>
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?= $totalPages ?>">
-                                Last <i class="fas fa-chevron-right"></i>
+                            <a class="page-link" href="<?= site_url('users?page=' . $totalPages) ?>">
+                                Last <i class="fas fa-angle-double-right"></i>
                             </a>
+                        </li>
+                    <?php else: ?>
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                Next <i class="fas fa-angle-right"></i>
+                            </span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                Last <i class="fas fa-angle-double-right"></i>
+                            </span>
                         </li>
                     <?php endif; ?>
                 </ul>
@@ -998,173 +997,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add User modal elements
-            const openAddUserBtn = document.getElementById('openAddUserBtn');
-            const addUserModalEl = document.getElementById('addUserModal');
-            const addUserModal = addUserModalEl ? new bootstrap.Modal(addUserModalEl) : null;
-            const submitAddUser = document.getElementById('submitAddUser');
-
-            if (openAddUserBtn) {
-                openAddUserBtn.addEventListener('click', function() {
-                    addUserModal?.show();
-                });
-            }
-
-            // Full Name field - allow typing but validate on submit
-            // No real-time blocking - user can type special characters but will get warning on submit
-
-            // Username field - allow typing but validate on submit
-            // No real-time blocking - user can type special characters but will get warning on submit
-
-            // Create user handler
-            submitAddUser?.addEventListener('click', function() {
-                const name = document.getElementById('add_name').value.trim();
-                const username = document.getElementById('add_username').value.trim();
-                const email = document.getElementById('add_email').value.trim();
-                const role = document.getElementById('add_role').value;
-                const password = document.getElementById('add_password').value;
-                const password_confirm = document.getElementById('add_password_confirm').value;
-
-                // Clear previous errors
-                document.getElementById('name-error').textContent = '';
-                document.getElementById('username-error').textContent = '';
-                document.getElementById('add_name').classList.remove('is-invalid');
-                document.getElementById('add_username').classList.remove('is-invalid');
-
-                // Collect all errors
-                const errors = [];
-                let hasError = false;
-
-                // Validate required fields
-                if (!name) {
-                    errors.push('❌ Full Name is required');
-                    document.getElementById('add_name').classList.add('is-invalid');
-                    document.getElementById('name-error').textContent = 'Full Name is required';
-                    hasError = true;
-                }
-
-                if (!username) {
-                    errors.push('❌ Username is required');
-                    document.getElementById('add_username').classList.add('is-invalid');
-                    document.getElementById('username-error').textContent = 'Username is required';
-                    hasError = true;
-                }
-
-                if (!email) {
-                    errors.push('❌ Email is required');
-                    hasError = true;
-                }
-
-                if (!password) {
-                    errors.push('❌ Password is required');
-                    hasError = true;
-                }
-
-                // Validate name - no special characters (only letters, numbers, spaces)
-                if (name) {
-                    const namePattern = /^[A-Za-z0-9\s]+$/;
-                    if (!namePattern.test(name)) {
-                        errors.push('⚠️ FULL NAME ERROR: Contains special characters\n   Allowed: Letters, Numbers, Spaces only');
-                        document.getElementById('add_name').classList.add('is-invalid');
-                        document.getElementById('name-error').textContent = 'Name cannot contain special characters. Only letters, numbers, and spaces are allowed.';
-                        hasError = true;
-                    }
-                }
-
-                // Validate username - no special characters (only letters, numbers, underscore)
-                if (username) {
-                    const usernamePattern = /^[A-Za-z0-9_]+$/;
-                    if (!usernamePattern.test(username)) {
-                        errors.push('⚠️ USERNAME ERROR: Contains special characters\n   Allowed: Letters, Numbers, Underscore (_) only');
-                        document.getElementById('add_username').classList.add('is-invalid');
-                        document.getElementById('username-error').textContent = 'Username cannot contain special characters. Only letters, numbers, and underscore (_) are allowed.';
-                        hasError = true;
-                    }
-                }
-
-                // Validate email format
-                if (email) {
-                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailPattern.test(email)) {
-                        errors.push('⚠️ EMAIL ERROR: Invalid email format\n   Example: user@example.com');
-                        hasError = true;
-                    }
-                }
 
                 // Validate password match
-                if (password && password_confirm) {
-                    if (password !== password_confirm) {
-                        errors.push('⚠️ PASSWORD ERROR: Passwords do not match');
-                        hasError = true;
-                    }
-                }
-
-                // Show all errors if any
-                if (hasError) {
-                    let errorMessage = '⚠️ VALIDATION ERRORS:\n\n';
-                    errorMessage += errors.join('\n\n');
-                    errorMessage += '\n\nPlease fix the errors above and try again.';
-                    
-                    alert(errorMessage);
-                    
-                    // Focus on first error field
-                    if (document.getElementById('add_name').classList.contains('is-invalid')) {
-                        document.getElementById('add_name').focus();
-                    } else if (document.getElementById('add_username').classList.contains('is-invalid')) {
-                        document.getElementById('add_username').focus();
-                    }
-                    
-                    return false;
-                }
-
-                submitAddUser.disabled = true;
-
-                fetch('<?= site_url('users/create') ?>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        '<?= csrf_header() ?>': '<?= csrf_token() ?>'
-                    },
-                    body: JSON.stringify({ name, username, email, role, password })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    submitAddUser.disabled = false;
-                    if (data.success) {
-                        addUserModal?.hide();
-                        showNotification('User created successfully', 'success');
-                        // Append new row to table (simple append - may refresh for full data)
-                        appendUserRow(data.user);
-                        // Update totals
-                        const totalEl = document.querySelector('.stat-card.total .stat-value');
-                        if (totalEl) totalEl.textContent = parseInt(totalEl.textContent) + 1;
-                    } else {
-                        showNotification(data.message || 'Failed to create user', 'error');
-                    }
-                }).catch(err => {
-                    console.error(err);
-                    submitAddUser.disabled = false;
-                    showNotification('Error creating user', 'error');
-                });
-            });
-
-            // Helper to append a user row
-            function appendUserRow(user) {
-                if (!user) return;
-                const tbody = document.getElementById('usersTableBody');
-                const tr = document.createElement('tr');
-                tr.className = 'user-row';
-                tr.setAttribute('data-user-id', user.id);
-                tr.setAttribute('data-user-role', user.role);
-                tr.innerHTML = `
-                    <td class="col-id"><span class="id-badge">#${user.id}</span></td>
-                    <td class="col-name"><div class="user-info"><div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div><span class="user-name">${escapeHtml(user.name)}</span></div></td>
-                    <td class="col-email"><span class="email-text">${escapeHtml(user.email)}</span></td>
-                    <td class="col-role">
-                        ${user.role === 'admin' ? `<div class="role-display admin-locked"><i class="fas fa-crown"></i> Admin <span class="lock-icon"><i class="fas fa-lock"></i></span></div>` : `<select class="role-select" data-user-id="${user.id}" data-original-role="${user.role}"><option value="admin">Admin</option><option value="teacher">Teacher</option><option value="student">Student</option></select>`}
-                    </td>
-                    <td class="col-created"><span class="created-date">${new Date(user.created_at).toLocaleDateString()}</span><span class="created-time">${new Date(user.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></td>
                     <td class="col-actions"><div class="action-buttons"><a href="<?= site_url('users/edit/') ?>${user.id}" class="btn-action btn-edit" title="Edit user"><i class="fas fa-edit"></i></a><button class="btn-action btn-delete" data-user-id="${user.id}" data-user-name="${escapeHtml(user.name)}" title="Delete user"><i class="fas fa-trash"></i></button></div></td>
                 `;
                 tbody.prepend(tr);
@@ -1311,16 +1145,12 @@
                     const userName = this.getAttribute('data-user-name');
 
                     if (confirm(`Are you sure you want to delete "${userName}"? This action cannot be undone.`)) {
-                        fetch('<?= site_url('users/delete') ?>', {
+                        fetch('<?= site_url('users/delete') ?>/' + userId, {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
                                 'X-Requested-With': 'XMLHttpRequest',
                                 '<?= csrf_header() ?>': '<?= csrf_token() ?>'
-                            },
-                            body: JSON.stringify({
-                                user_id: userId
-                            })
+                            }
                         })
                         .then(response => response.json())
                         .then(data => {

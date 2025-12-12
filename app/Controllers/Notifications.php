@@ -29,6 +29,7 @@ class Notifications extends BaseController
                 ->setJSON([
                     'success' => false,
                     'message' => 'User not logged in',
+                    'csrfHash' => csrf_hash(),
                     'unreadCount' => 0,
                     'notifications' => []
                 ]);
@@ -38,10 +39,11 @@ class Notifications extends BaseController
         
         try {
             $unreadCount = $this->notificationModel->getUnreadCount($userId);
-            $notifications = $this->notificationModel->getNotificationsForUser($userId, 10);
+            $notifications = $this->notificationModel->getNotificationsForUser($userId, 5);
 
             return $this->response->setJSON([
                 'success' => true,
+                'csrfHash' => csrf_hash(),
                 'unreadCount' => $unreadCount,
                 'notifications' => $notifications
             ]);
@@ -51,6 +53,7 @@ class Notifications extends BaseController
                 ->setJSON([
                     'success' => false,
                     'message' => 'Error fetching notifications',
+                    'csrfHash' => csrf_hash(),
                     'unreadCount' => 0,
                     'notifications' => []
                 ]);
@@ -71,7 +74,8 @@ class Notifications extends BaseController
                 ->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED)
                 ->setJSON([
                     'success' => false,
-                    'message' => 'User not logged in'
+                    'message' => 'User not logged in',
+                    'csrfHash' => csrf_hash(),
                 ]);
         }
 
@@ -80,7 +84,8 @@ class Notifications extends BaseController
                 ->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)
                 ->setJSON([
                     'success' => false,
-                    'message' => 'Notification ID is required'
+                    'message' => 'Notification ID is required',
+                    'csrfHash' => csrf_hash(),
                 ]);
         }
 
@@ -93,7 +98,8 @@ class Notifications extends BaseController
                     ->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)
                     ->setJSON([
                         'success' => false,
-                        'message' => 'Notification not found'
+                        'message' => 'Notification not found',
+                        'csrfHash' => csrf_hash(),
                     ]);
             }
 
@@ -102,7 +108,8 @@ class Notifications extends BaseController
                     ->setStatusCode(ResponseInterface::HTTP_FORBIDDEN)
                     ->setJSON([
                         'success' => false,
-                        'message' => 'Unauthorized access to this notification'
+                        'message' => 'Unauthorized access to this notification',
+                        'csrfHash' => csrf_hash(),
                     ]);
             }
 
@@ -116,6 +123,7 @@ class Notifications extends BaseController
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Notification marked as read',
+                'csrfHash' => csrf_hash(),
                 'unreadCount' => $unreadCount
             ]);
         } catch (\Exception $e) {
@@ -123,7 +131,8 @@ class Notifications extends BaseController
                 ->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR)
                 ->setJSON([
                     'success' => false,
-                    'message' => 'Error marking notification as read'
+                    'message' => 'Error marking notification as read',
+                    'csrfHash' => csrf_hash(),
                 ]);
         }
     }

@@ -15,8 +15,14 @@
             <div class="card-body p-4">
                 <form action="<?= base_url('register') ?>" method="post">
                     <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
+                        <label for="name" class="form-label">Full Name</label>
                         <input type="text" class="form-control" id="name" name="name" required value="<?= esc(old('name')) ?>">
+                        <small class="form-text text-muted">Only letters, numbers, spaces, Ñ, and ñ are allowed.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required value="<?= esc(old('username')) ?>">
+                        <small class="form-text text-muted">Only letters, numbers, underscores (_), Ñ, and ñ are allowed.</small>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>

@@ -153,27 +153,56 @@ class Course extends BaseController
             ]);
         }
 
-        // Try to resolve assigned teacher to an ID
-        $assignedTeacher = $input['assigned_teacher'] ?? null;
-        $instructorId = null;
-        if (!empty($assignedTeacher)) {
-            $userModel = new UserModel();
+        // Disallow special characters
+        // Course name: letters, numbers, spaces, hyphen, underscore
+        if (!preg_match('/^[a-zA-Z0-9 _-]+$/', $courseName)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'success' => false,
+                'message' => 'Course name: Special characters are not allowed. Only letters, numbers, spaces, hyphen (-) and underscore (_) are allowed.'
+            ]);
+        }
 
-            // If numeric, treat as user id
-            if (is_numeric($assignedTeacher)) {
-                $possible = $userModel->find((int)$assignedTeacher);
-                if ($possible) {
-                    $instructorId = $possible['id'];
-                }
-            } else {
-                // Try to find by exact name first, then by email if looks like an email
-                if (filter_var($assignedTeacher, FILTER_VALIDATE_EMAIL)) {
-                    $possible = $userModel->where('email', $assignedTeacher)->first();
-                    if ($possible) $instructorId = $possible['id'];
+        // Course code: letters, numbers, hyphen
+        if (!preg_match('/^[a-zA-Z0-9-]+$/', $courseCode)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'success' => false,
+                'message' => 'Course code: Special characters are not allowed. Only letters, numbers, and hyphen (-) are allowed.'
+            ]);
+        }
+
+        // Resolve instructor_id
+        $instructorId = null;
+        if ($role === 'teacher') {
+            $instructorId = (int) $session->get('user_id');
+        } else {
+            // Admin must choose an assigned teacher
+            $assignedTeacher = $input['assigned_teacher'] ?? null;
+            if (!empty($assignedTeacher)) {
+                $userModel = new UserModel();
+
+                // If numeric, treat as user id
+                if (is_numeric($assignedTeacher)) {
+                    $possible = $userModel->find((int) $assignedTeacher);
+                    if ($possible) {
+                        $instructorId = (int) $possible['id'];
+                    }
                 } else {
-                    $possible = $userModel->like('name', $assignedTeacher)->first();
-                    if ($possible) $instructorId = $possible['id'];
+                    // Try email first if it looks like an email, otherwise match by name
+                    if (filter_var($assignedTeacher, FILTER_VALIDATE_EMAIL)) {
+                        $possible = $userModel->where('email', $assignedTeacher)->first();
+                        if ($possible) $instructorId = (int) $possible['id'];
+                    } else {
+                        $possible = $userModel->like('name', $assignedTeacher)->first();
+                        if ($possible) $instructorId = (int) $possible['id'];
+                    }
                 }
+            }
+
+            if (empty($instructorId)) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'success' => false,
+                    'message' => 'Please select a valid teacher to assign to this course.'
+                ]);
             }
         }
 
@@ -241,18 +270,27 @@ class Course extends BaseController
         $courseModel = new \App\Models\CourseModel();
         $notificationModel = new NotificationModel();
 
-        // Check if already enrolled
+        // Check if already enrolled/pending
         $existingEnrollment = $enrollmentModel
             ->where('user_id', $userId)
             ->where('course_id', $courseId)
             ->first();
-            
+
         if ($existingEnrollment) {
-            return $this->response
-                ->setJSON([
-                    'success' => false,
-                    'message' => 'Already enrolled in this course'
+            $existingStatus = $existingEnrollment['status'] ?? 'approved';
+            if ($existingStatus === 'pending') {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'status' => 'pending',
+                    'message' => 'Enrollment request is already pending approval.'
                 ]);
+            }
+
+            return $this->response->setJSON([
+                'success' => false,
+                'status' => $existingStatus,
+                'message' => 'You are already enrolled in this course.'
+            ]);
         }
 
         // Get course information
@@ -266,25 +304,40 @@ class Course extends BaseController
                 ->setStatusCode(404);
         }
 
-        // Insert new enrollment
+        // Insert new enrollment as PENDING (requires admin approval)
         $data = [
             'user_id' => $userId,
             'course_id' => $courseId,
             'enrollment_date' => date('Y-m-d H:i:s'),
+            'status' => 'pending',
         ];
 
         try {
             if ($enrollmentModel->insert($data)) {
                 // Create a notification for the student
                 $courseName = $course['title'] ?? $course['name'] ?? 'Unknown Course';
-                $message = "You have been successfully enrolled in the course: <strong>$courseName</strong>";
+                $message = "Enrollment request submitted for: {$courseName}. Waiting for admin approval.";
                 $notificationModel->createNotification($userId, $message);
 
-                return $this->response
-                    ->setJSON([
-                        'success' => true,
-                        'message' => 'Successfully enrolled in this course!'
-                    ]);
+                // Create a notification for the assigned instructor (exclude admins)
+                $instructorId = $course['instructor_id'] ?? null;
+                if (!empty($instructorId) && (int) $instructorId !== (int) $userId) {
+                    $userModel = new UserModel();
+                    $instructor = $userModel->find($instructorId);
+                    $instructorRole = $instructor['role'] ?? null;
+
+                    if ($instructor && $instructorRole !== 'admin') {
+                        $studentLabel = $session->get('name') ?: $session->get('userEmail') ?: 'A student';
+                        $instructorMessage = "New enrollment request from {$studentLabel} for: {$courseName}.";
+                        $notificationModel->createNotification((int) $instructorId, $instructorMessage);
+                    }
+                }
+
+                return $this->response->setJSON([
+                    'success' => true,
+                    'status' => 'pending',
+                    'message' => 'Enrollment request submitted. Pending approval.'
+                ]);
             } else {
                 return $this->response
                     ->setJSON([

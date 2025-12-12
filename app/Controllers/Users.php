@@ -21,18 +21,26 @@ class Users extends BaseController
             return redirect()->to(base_url('login'))->with('error', 'Access denied');
         }
 
-        // Get all users with pagination
+        // Get all users with pagination, ordered by ID ascending
         $page = $this->request->getVar('page') ?? 1;
         $perPage = 10;
         $offset = ($page - 1) * $perPage;
 
+        // Get total count first
+        $totalUsers = $this->userModel->countAllResults();
+        
+        // Get paginated users, ordered by ID ascending
+        $users = $this->userModel->orderBy('id', 'ASC')
+                               ->findAll($perPage, $offset);
+
         $data = [
-            'users' => $this->userModel->limit($perPage, $offset)->findAll(),
-            'totalUsers' => $this->userModel->countAllResults(),
-            'currentPage' => $page,
+            'users' => $users,
+            'totalUsers' => $totalUsers,
+            'currentPage' => (int)$page,
             'perPage' => $perPage,
-            'totalPages' => ceil($this->userModel->countAllResults() / $perPage),
-            'title' => 'Manage Users'
+            'totalPages' => ceil($totalUsers / $perPage),
+            'title' => 'Manage Users',
+            'pager' => $this->userModel->pager
         ];
 
         return view('manage_users', $data);
@@ -101,12 +109,22 @@ class Users extends BaseController
         }
     }
 
-    public function delete($id)
+    public function delete($id = null)
     {
         // Check if user is admin
         $session = session();
         if (!$session->get('isLoggedIn') || $session->get('role') !== 'admin') {
             return $this->response->setJSON(['success' => false, 'message' => 'Access denied']);
+        }
+
+        // Get user ID from parameter or JSON body
+        if ($id === null) {
+            $data = $this->request->getJSON(true);
+            $id = $data['user_id'] ?? null;
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['success' => false, 'message' => 'User ID is required']);
         }
 
         // Prevent deleting yourself
@@ -170,77 +188,64 @@ class Users extends BaseController
         }
     }
 
-    /**
-     * Create a new user (admin only)
-     */
-    public function create()
+
+    public function add()
     {
+        // Check if user is admin
         $session = session();
         if (!$session->get('isLoggedIn') || $session->get('role') !== 'admin') {
-            return $this->response->setJSON(['success' => false, 'message' => 'Access denied']);
+            return redirect()->to(base_url('login'))->with('error', 'Access denied');
         }
 
-        $data = $this->request->getJSON(true);
-        $name = trim($data['name'] ?? '');
-        $username = trim($data['username'] ?? '');
-        $email = trim($data['email'] ?? '');
-        $role = $data['role'] ?? 'student';
-        $password = $data['password'] ?? '';
-
-        if (!$name || !$username || !$email || !$password) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Missing required fields']);
-        }
-
-        // Validate name - no special characters (only letters, numbers, spaces)
-        if (!preg_match('/^[A-Za-z0-9\s]+$/', $name)) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Name cannot contain special characters. Only letters, numbers, and spaces are allowed.']);
-        }
-
-        // Validate username - no special characters (only letters, numbers, underscore)
-        if (!preg_match('/^[A-Za-z0-9_]+$/', $username)) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Username cannot contain special characters. Only letters, numbers, and underscore (_) are allowed.']);
-        }
-
-        // Validate role
-        $validRoles = ['admin', 'teacher', 'student'];
-        if (!in_array($role, $validRoles)) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Invalid role']);
-        }
-
-        // Check for existing username
-        $usernameExists = $this->userModel->where('username', $username)->first();
-        if ($usernameExists) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Username already exists']);
-        }
-
-        // Check for existing email
-        $emailExists = $this->userModel->where('email', $email)->first();
-        if ($emailExists) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Email already exists']);
-        }
-
-        $hashed = password_hash($password, PASSWORD_DEFAULT);
-
-        $insertData = [
-            'name' => $name,
-            'username' => $username,
-            'email' => $email,
-            'password' => $hashed,
-            'role' => $role,
-            'created_at' => date('Y-m-d H:i:s')
+        $data = [
+            'title' => 'Add New User',
+            'validation' => \Config\Services::validation()
         ];
 
-        try {
-            $newId = $this->userModel->insert($insertData);
-            if ($newId) {
-                $newUser = $this->userModel->find($newId);
-                return $this->response->setJSON(['success' => true, 'message' => 'User created', 'user' => $newUser]);
-            }
-        } catch (\Exception $e) {
-            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+        return view('add_user', $data);
+    }
+
+    public function create()
+    {
+        // Check if user is admin
+        $session = session();
+        if (!$session->get('isLoggedIn') || $session->get('role') !== 'admin') {
+            return redirect()->to(base_url('login'))->with('error', 'Access denied');
         }
 
-        return $this->response->setJSON(['success' => false, 'message' => 'Failed to create user']);
+        // Validate input
+        $rules = [
+            'name' => 'required|min_length[3]|max_length[100]|regex_match[/^[A-Za-z0-9 _\-]+$/]',
+            'username' => 'required|min_length[3]|max_length[50]|regex_match[/^[A-Za-z0-9_\-]+$/]|is_unique[users.username]',
+            'email' => 'required|valid_email|is_unique[users.email]',
+            'password' => 'required|min_length[8]',
+            'password_confirm' => 'matches[password]',
+            'role' => 'required|in_list[admin,teacher,student]'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        // Prepare user data
+        $data = [
+            'name' => $this->request->getPost('name'),
+            'username' => $this->request->getPost('username'),
+            'email' => $this->request->getPost('email'),
+            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'role' => $this->request->getPost('role'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        // Save to database
+        try {
+            $this->userModel->insert($data);
+            return redirect()->to('/users')->with('success', 'User added successfully');
+        } catch (\Exception $e) {
+            log_message('error', 'Error adding user: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to add user: ' . $e->getMessage());
+        }
     }
 
     public function search()
