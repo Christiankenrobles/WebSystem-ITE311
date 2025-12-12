@@ -226,8 +226,16 @@
                             <form id="addUserForm">
                                 <?= csrf_field() ?>
                                 <div class="mb-3">
-                                    <label class="form-label">Full Name</label>
+                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
                                     <input type="text" name="name" id="add_name" class="form-control" required>
+                                    <small class="form-text text-muted">Only letters, numbers, and spaces are allowed. Special characters will be rejected on submit.</small>
+                                    <div class="invalid-feedback" id="name-error"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Username <span class="text-danger">*</span></label>
+                                    <input type="text" name="username" id="add_username" class="form-control" required>
+                                    <small class="form-text text-muted">Only letters, numbers, and underscore (_) are allowed. Special characters will be rejected on submit.</small>
+                                    <div class="invalid-feedback" id="username-error"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Email</label>
@@ -1002,22 +1010,111 @@
                 });
             }
 
+            // Full Name field - allow typing but validate on submit
+            // No real-time blocking - user can type special characters but will get warning on submit
+
+            // Username field - allow typing but validate on submit
+            // No real-time blocking - user can type special characters but will get warning on submit
+
             // Create user handler
             submitAddUser?.addEventListener('click', function() {
                 const name = document.getElementById('add_name').value.trim();
+                const username = document.getElementById('add_username').value.trim();
                 const email = document.getElementById('add_email').value.trim();
                 const role = document.getElementById('add_role').value;
                 const password = document.getElementById('add_password').value;
                 const password_confirm = document.getElementById('add_password_confirm').value;
 
-                if (!name || !email || !role || !password) {
-                    alert('Please fill all required fields.');
-                    return;
+                // Clear previous errors
+                document.getElementById('name-error').textContent = '';
+                document.getElementById('username-error').textContent = '';
+                document.getElementById('add_name').classList.remove('is-invalid');
+                document.getElementById('add_username').classList.remove('is-invalid');
+
+                // Collect all errors
+                const errors = [];
+                let hasError = false;
+
+                // Validate required fields
+                if (!name) {
+                    errors.push('❌ Full Name is required');
+                    document.getElementById('add_name').classList.add('is-invalid');
+                    document.getElementById('name-error').textContent = 'Full Name is required';
+                    hasError = true;
                 }
 
-                if (password !== password_confirm) {
-                    alert('Passwords do not match');
-                    return;
+                if (!username) {
+                    errors.push('❌ Username is required');
+                    document.getElementById('add_username').classList.add('is-invalid');
+                    document.getElementById('username-error').textContent = 'Username is required';
+                    hasError = true;
+                }
+
+                if (!email) {
+                    errors.push('❌ Email is required');
+                    hasError = true;
+                }
+
+                if (!password) {
+                    errors.push('❌ Password is required');
+                    hasError = true;
+                }
+
+                // Validate name - no special characters (only letters, numbers, spaces)
+                if (name) {
+                    const namePattern = /^[A-Za-z0-9\s]+$/;
+                    if (!namePattern.test(name)) {
+                        errors.push('⚠️ FULL NAME ERROR: Contains special characters\n   Allowed: Letters, Numbers, Spaces only');
+                        document.getElementById('add_name').classList.add('is-invalid');
+                        document.getElementById('name-error').textContent = 'Name cannot contain special characters. Only letters, numbers, and spaces are allowed.';
+                        hasError = true;
+                    }
+                }
+
+                // Validate username - no special characters (only letters, numbers, underscore)
+                if (username) {
+                    const usernamePattern = /^[A-Za-z0-9_]+$/;
+                    if (!usernamePattern.test(username)) {
+                        errors.push('⚠️ USERNAME ERROR: Contains special characters\n   Allowed: Letters, Numbers, Underscore (_) only');
+                        document.getElementById('add_username').classList.add('is-invalid');
+                        document.getElementById('username-error').textContent = 'Username cannot contain special characters. Only letters, numbers, and underscore (_) are allowed.';
+                        hasError = true;
+                    }
+                }
+
+                // Validate email format
+                if (email) {
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(email)) {
+                        errors.push('⚠️ EMAIL ERROR: Invalid email format\n   Example: user@example.com');
+                        hasError = true;
+                    }
+                }
+
+                // Validate password match
+                if (password && password_confirm) {
+                    if (password !== password_confirm) {
+                        errors.push('⚠️ PASSWORD ERROR: Passwords do not match');
+                        hasError = true;
+                    }
+                }
+
+                // Show all errors if any
+                if (hasError) {
+                    let errorMessage = '⚠️ VALIDATION ERRORS:\n\n';
+                    errorMessage += errors.join('\n\n');
+                    errorMessage += '\n\nPlease fix the errors above and try again.';
+                    
+                    alert(errorMessage);
+                    
+                    // Focus on first error field
+                    if (document.getElementById('add_name').classList.contains('is-invalid')) {
+                        document.getElementById('add_name').focus();
+                    } else if (document.getElementById('add_username').classList.contains('is-invalid')) {
+                        document.getElementById('add_username').focus();
+                    }
+                    
+                    return false;
                 }
 
                 submitAddUser.disabled = true;
@@ -1029,7 +1126,7 @@
                         'X-Requested-With': 'XMLHttpRequest',
                         '<?= csrf_header() ?>': '<?= csrf_token() ?>'
                     },
-                    body: JSON.stringify({ name, email, role, password })
+                    body: JSON.stringify({ name, username, email, role, password })
                 })
                 .then(r => r.json())
                 .then(data => {

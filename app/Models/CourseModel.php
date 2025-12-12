@@ -17,6 +17,11 @@ class CourseModel extends Model
         'instructor_id',
         'created_at',
         'updated_at',
+        'schedule_days',
+        'schedule_time_start',
+        'schedule_time_end',
+        'schedule_location',
+        'schedule_type',
     ];
 
     protected $useTimestamps = false;
@@ -26,7 +31,7 @@ class CourseModel extends Model
         return $this->db->table('enrollments')
             ->join('courses', 'enrollments.course_id = courses.id')
             ->where('enrollments.user_id', $userId)
-            ->select('courses.id, courses.title, courses.description, enrollments.enrollment_date')
+            ->select('courses.*, enrollments.enrollment_date')
             ->get()
             ->getResultArray();
     }
@@ -101,5 +106,38 @@ class CourseModel extends Model
         }
 
         return $builder->get()->getResultArray();
+    }
+
+    /**
+     * Get courses by instructor ID
+     * 
+     * @param int $instructorId The instructor/user ID
+     * @return array Array of courses created by the instructor
+     */
+    public function getCoursesByInstructor($instructorId)
+    {
+        return $this->builder()
+            ->where('instructor_id', $instructorId)
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Get enrollment schedule for a user
+     * 
+     * @param int $userId The user ID
+     * @return array Array of enrolled courses with schedule information
+     */
+    public function getEnrollmentSchedule($userId)
+    {
+        return $this->db->table('enrollments')
+            ->join('courses', 'enrollments.course_id = courses.id')
+            ->join('users', 'courses.instructor_id = users.id')
+            ->where('enrollments.user_id', $userId)
+            ->select('courses.*, enrollments.enrollment_date, users.name as instructor_name, users.email as instructor_email')
+            ->orderBy('courses.schedule_days', 'ASC')
+            ->orderBy('courses.schedule_time_start', 'ASC')
+            ->get()
+            ->getResultArray();
     }
 }

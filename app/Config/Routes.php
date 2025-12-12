@@ -21,6 +21,10 @@ $routes->get('/dashboard', 'Home::dashboard');
 $routes->get('/admin/dashboard', 'Home::dashboard');
 $routes->get('/teacher/dashboard', 'Home::dashboard');
 $routes->get('/admin/materials', 'Home::materialsManagement');
+$routes->get('/admin/enrollments', 'Home::adminEnrollments');
+$routes->get('/admin/schedule', 'Home::adminSchedule');
+$routes->get('/admin/enrollment-dashboard', 'Home::enrollmentDashboard');
+$routes->get('/enrollment-dashboard', 'Home::enrollmentDashboard');
 // Registration
 $routes->get('/register', 'Auth::register');
 $routes->post('/register', 'Auth::store');
@@ -31,6 +35,14 @@ $routes->get('/course', 'Course::index');
 $routes->post('/course/enroll', 'Course::enroll');
 $routes->get('/course/search', 'Course::search');
 $routes->post('/course/search', 'Course::search');
+$routes->get('/course/schedule', 'Course::schedule');
+$routes->get('/schedule', 'Course::schedule');
+$routes->get('/course/edit-schedule/(:num)', 'Course::editSchedule/$1');
+$routes->post('/course/update-schedule/(:num)', 'Course::updateSchedule/$1');
+$routes->get('/course/upload-schedule', 'Course::uploadSchedule');
+$routes->post('/course/upload-schedule', 'Course::uploadSchedule');
+$routes->get('/course/preview-schedule-upload', 'Course::previewScheduleUpload');
+$routes->post('/course/import-schedule', 'Course::importSchedule');
 // Course creation (AJAX / form)
 $routes->post('/course/create', 'Course::create');
 

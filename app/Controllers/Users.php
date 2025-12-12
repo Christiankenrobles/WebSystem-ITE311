@@ -182,12 +182,23 @@ class Users extends BaseController
 
         $data = $this->request->getJSON(true);
         $name = trim($data['name'] ?? '');
+        $username = trim($data['username'] ?? '');
         $email = trim($data['email'] ?? '');
         $role = $data['role'] ?? 'student';
         $password = $data['password'] ?? '';
 
-        if (!$name || !$email || !$password) {
+        if (!$name || !$username || !$email || !$password) {
             return $this->response->setJSON(['success' => false, 'message' => 'Missing required fields']);
+        }
+
+        // Validate name - no special characters (only letters, numbers, spaces)
+        if (!preg_match('/^[A-Za-z0-9\s]+$/', $name)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Name cannot contain special characters. Only letters, numbers, and spaces are allowed.']);
+        }
+
+        // Validate username - no special characters (only letters, numbers, underscore)
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $username)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Username cannot contain special characters. Only letters, numbers, and underscore (_) are allowed.']);
         }
 
         // Validate role
@@ -196,9 +207,15 @@ class Users extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Invalid role']);
         }
 
+        // Check for existing username
+        $usernameExists = $this->userModel->where('username', $username)->first();
+        if ($usernameExists) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Username already exists']);
+        }
+
         // Check for existing email
-        $exists = $this->userModel->where('email', $email)->first();
-        if ($exists) {
+        $emailExists = $this->userModel->where('email', $email)->first();
+        if ($emailExists) {
             return $this->response->setJSON(['success' => false, 'message' => 'Email already exists']);
         }
 
@@ -206,6 +223,7 @@ class Users extends BaseController
 
         $insertData = [
             'name' => $name,
+            'username' => $username,
             'email' => $email,
             'password' => $hashed,
             'role' => $role,

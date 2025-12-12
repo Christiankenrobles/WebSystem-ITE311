@@ -57,7 +57,27 @@
                     </a>
                 </div>
                 <div class="col-auto">
-                    <a href="#" class="btn btn-info btn-lg">
+                    <a href="<?= base_url('course/upload-schedule') ?>" class="btn btn-warning btn-lg">
+                        <i class="fas fa-upload me-2"></i>Upload Schedule
+                    </a>
+                </div>
+                <div class="col-auto">
+                    <a href="<?= base_url('enrollment-dashboard') ?>" class="btn btn-primary btn-lg">
+                        <i class="fas fa-tachometer-alt me-2"></i>Enrollment Dashboard
+                    </a>
+                </div>
+                <div class="col-auto">
+                    <a href="<?= base_url('admin/enrollments') ?>" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-user-graduate me-2"></i>All Enrollments
+                    </a>
+                </div>
+                <div class="col-auto">
+                    <a href="<?= base_url('admin/schedule') ?>" class="btn btn-info btn-lg">
+                        <i class="fas fa-calendar-alt me-2"></i>All Schedules
+                    </a>
+                </div>
+                <div class="col-auto">
+                    <a href="#" class="btn btn-secondary btn-lg">
                         <i class="fas fa-chart-bar me-2"></i>Analytics
                     </a>
                 </div>
@@ -100,16 +120,62 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-3">
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-primary">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-primary">
+                                <i class="fas fa-user-graduate me-2"></i>Total Enrollments
+                            </h5>
+                            <h2 class="text-primary"><?= isset($totalEnrollments) ? $totalEnrollments : 0 ?></h2>
+                            <a href="<?= base_url('admin/enrollments') ?>" class="btn btn-sm btn-primary mt-2">
+                                View All <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-success">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-success">
+                                <i class="fas fa-users me-2"></i>Enrolled Students
+                            </h5>
+                            <h2 class="text-success"><?= isset($uniqueStudentsEnrolled) ? $uniqueStudentsEnrolled : 0 ?></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-info">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-info">
+                                <i class="fas fa-calendar-alt me-2"></i>Courses with Enrollments
+                            </h5>
+                            <h2 class="text-info"><?= isset($coursesWithEnrollments) ? $coursesWithEnrollments : 0 ?></h2>
+                            <a href="<?= base_url('admin/schedule') ?>" class="btn btn-sm btn-info mt-2">
+                                View Schedule <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-4">
-            <h3>All Courses</h3>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">All Courses</h3>
+                <div>
+                    <a href="<?= base_url('course/upload-schedule') ?>" class="btn btn-warning btn-sm">
+                        <i class="fas fa-upload me-1"></i>Upload Schedule File
+                    </a>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>Course Title</th>
                             <th>Description</th>
+                            <th>Schedule</th>
                             <th>Created By</th>
                             <th>Actions</th>
                         </tr>
@@ -119,17 +185,40 @@
                             <?php foreach ($allCourses as $course): ?>
                                 <tr>
                                     <td><?= esc($course['title']) ?></td>
-                                    <td><?= esc(substr($course['description'], 0, 50)) ?>...</td>
+                                    <td><?= esc(substr($course['description'] ?? '', 0, 50)) ?>...</td>
+                                    <td>
+                                        <?php if (!empty($course['schedule_days'])): ?>
+                                            <span class="badge bg-primary me-1">
+                                                <i class="fas fa-calendar me-1"></i><?= esc($course['schedule_days']) ?>
+                                            </span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($course['schedule_time_start'])): ?>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-clock me-1"></i>
+                                                <?= date('g:i A', strtotime($course['schedule_time_start'])) ?>
+                                                <?php if (!empty($course['schedule_time_end'])): ?>
+                                                    - <?= date('g:i A', strtotime($course['schedule_time_end'])) ?>
+                                                <?php endif; ?>
+                                            </span>
+                                        <?php endif; ?>
+                                        <?php if (empty($course['schedule_days']) && empty($course['schedule_time_start'])): ?>
+                                            <span class="text-muted">Not scheduled</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?= esc($course['instructor_id'] ?? 'N/A') ?></td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-primary">View</a>
-                                        <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="<?= base_url('course/edit-schedule/' . $course['id']) ?>" class="btn btn-sm btn-warning me-1" title="Edit Schedule">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="<?= base_url('materials/list/' . $course['id']) ?>" class="btn btn-sm btn-primary" title="View Materials">
+                                            <i class="fas fa-book"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="4" class="text-center">No courses available.</td>
+                                <td colspan="5" class="text-center">No courses available.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -137,30 +226,65 @@
             </div>
         </div>
 
-        <div class="mt-4">
-            <h3>Recent Users</h3>
-            <div class="list-group">
-                <?php if (!empty($recentUsers)): ?>
-                    <?php foreach ($recentUsers as $user): ?>
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1"><?= esc($user['name']) ?></h5>
-                                <small><?= esc($user['role']) ?></small>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h3>Recent Users</h3>
+                <div class="list-group">
+                    <?php if (!empty($recentUsers)): ?>
+                        <?php foreach ($recentUsers as $user): ?>
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1"><?= esc($user['name']) ?></h5>
+                                    <small><span class="badge bg-secondary"><?= esc($user['role']) ?></span></small>
+                                </div>
+                                <p class="mb-1"><?= esc($user['email']) ?></p>
                             </div>
-                            <p class="mb-1"><?= esc($user['email']) ?></p>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="list-group-item">No users available.</div>
-                <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="list-group-item">No users available.</div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3>Recent Enrollments</h3>
+                <div class="list-group">
+                    <?php if (!empty($recentEnrollments)): ?>
+                        <?php 
+                        $courseModel = new \App\Models\CourseModel();
+                        $userModel = new \App\Models\UserModel();
+                        foreach ($recentEnrollments as $enrollment): 
+                            $course = $courseModel->find($enrollment['course_id']);
+                            $student = $userModel->find($enrollment['user_id']);
+                        ?>
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1"><?= esc($course['title'] ?? 'Unknown Course') ?></h6>
+                                    <small class="text-muted"><?= date('M d', strtotime($enrollment['enrollment_date'])) ?></small>
+                                </div>
+                                <p class="mb-1">
+                                    <i class="fas fa-user-graduate me-1"></i>
+                                    <?= esc($student['name'] ?? 'Unknown Student') ?>
+                                </p>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="list-group-item">No recent enrollments.</div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
     <!-- Teacher Dashboard Section -->
     <?php elseif (session('role') === 'teacher'): ?>
+        <div class="mb-3">
+            <a href="<?= base_url('schedule') ?>" class="btn btn-info btn-lg me-2">
+                <i class="fas fa-calendar-alt me-2"></i>View Schedule
+            </a>
+            <a href="#" class="btn btn-success btn-lg">Create New Course</a>
+        </div>
+        
         <div class="mt-4">
             <h3>My Courses</h3>
-            <a href="#" class="btn btn-success mb-3">Create New Course</a>
             <div class="list-group" id="teacher-courses">
                 <?php if (!empty($courses)): ?>
                     <?php foreach ($courses as $course): ?>
@@ -188,6 +312,13 @@
 
     <!-- Student Dashboard Section -->
     <?php else: ?>
+        <!-- Quick Actions -->
+        <div class="mb-3">
+            <a href="<?= base_url('schedule') ?>" class="btn btn-info btn-lg">
+                <i class="fas fa-calendar-alt me-2"></i>View My Schedule
+            </a>
+        </div>
+        
         <!-- Enrolled Courses Section -->
         <div class="mt-4">
             <h3>Enrolled Courses</h3>
@@ -197,6 +328,27 @@
                         <div class="list-group-item">
                             <h5 class="mb-1"><?= esc($course['title']) ?></h5>
                             <p class="mb-1"><?= esc($course['description']) ?></p>
+                            <div class="mb-2">
+                                <?php if (!empty($course['schedule_days'])): ?>
+                                    <span class="badge bg-primary me-1">
+                                        <i class="fas fa-calendar me-1"></i><?= esc($course['schedule_days']) ?>
+                                    </span>
+                                <?php endif; ?>
+                                <?php if (!empty($course['schedule_time_start'])): ?>
+                                    <span class="badge bg-success me-1">
+                                        <i class="fas fa-clock me-1"></i>
+                                        <?= date('g:i A', strtotime($course['schedule_time_start'])) ?>
+                                        <?php if (!empty($course['schedule_time_end'])): ?>
+                                            - <?= date('g:i A', strtotime($course['schedule_time_end'])) ?>
+                                        <?php endif; ?>
+                                    </span>
+                                <?php endif; ?>
+                                <?php if (!empty($course['schedule_location'])): ?>
+                                    <span class="badge bg-danger me-1">
+                                        <i class="fas fa-map-marker-alt me-1"></i><?= esc($course['schedule_location']) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                             <small>Enrolled on: <?= esc($course['enrollment_date']) ?></small>
                             <?php if (!empty($materials[$course['id']])): ?>
                                 <div class="mt-3">
